@@ -4,7 +4,7 @@
  */
 
 // Update the namespace after every update!!!
-namespace Mtphr\PostDuplicator;
+namespace Mtphr\EmailCustomizer;
 
 /**
  * Create the class
