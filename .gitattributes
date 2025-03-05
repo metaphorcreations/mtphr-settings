@@ -1,0 +1,15 @@
+# Exclude files from Composer package, but keep them in Git
+assets/src/            export-ignore
+assets/package-lock.json export-ignore
+assets/package.json    export-ignore
+assets/webpack.config.js export-ignore
+
+# Node modules should not be included in either Git or Composer package
+assets/node_modules/   export-ignore
+assets/node_modules/   -diff
+assets/node_modules/   -merge
+
+# Exclude development files
+.gitignore            export-ignore
+.gitattributes        export-ignore
+README.md             export-ignore
