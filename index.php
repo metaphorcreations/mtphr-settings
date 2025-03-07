@@ -3,6 +3,8 @@ use Mtphr\Settings;
 
 require_once __DIR__ . '/settings-class.php';
 
+add_action( 'plugins_loaded', __NAMESPACE__ . 'initialize_settings' );
+
 /**
  * Get things started
  * Add a custom function name for your settings to differentiate from other settings
@@ -11,6 +13,15 @@ function MTPHR_SETTINGS() {
 	return Settings::instance();
 }
 MTPHR_SETTINGS();
+
+/**
+ * Let other scripts know the settings are ready
+ */
+function initialize_settings() {
+  do_action( 'mtphrSettings/init' );
+}
+
+
 
 /**
  * Initialize the settings

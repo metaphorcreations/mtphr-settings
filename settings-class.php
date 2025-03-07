@@ -41,9 +41,6 @@ final class Settings {
       add_action( 'admin_menu', array( self::$instance, 'create_admin_pages' ) );
       add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_scripts' ) );
       add_action( 'rest_api_init', array( self::$instance, 'register_routes' ) );
-      
-      // Let everyone know we are initialized!
-      do_action( 'mtphrSettings/init' );
     }
     return self::$instance;
   }
