@@ -48,9 +48,9 @@ const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
             <div
               className={`mtphrSettings__field--tabs__content mtphrSettings__field--tabs__content--${tab.name}`}
             >
-              {currentTab.fields.map((tabField) => (
+              {currentTab.fields.map((tabField, index) => (
                 <Field
-                  key={tabField.id}
+                  key={tabField.id ? tabField.id : index}
                   field={tabField}
                   value={values[tabField.id] || ""}
                   onChange={onChange}

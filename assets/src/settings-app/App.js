@@ -242,7 +242,7 @@ export default ({ settingsId, settingsTitle }) => {
 
                     return (
                       <Field
-                        key={`field-${fieldId}-${settingsOption}-${fieldIndex}`} // Ensure unique key
+                        key={field.id ? field.id : fieldIndex} // Ensure unique key
                         field={field}
                         value={values[settingsOption][fieldId] || ""}
                         onChange={handleInputChange}

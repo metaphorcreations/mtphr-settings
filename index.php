@@ -12,14 +12,9 @@ function MTPHR_SETTINGS() {
 }
 MTPHR_SETTINGS();
 
-// Initialize the settings
-// MTPHR_SETTINGS()->init( [
-//   'id' => 'mtphrSettings',
-//   'textdomain' => 'mtphr-settings',
-//   'settings_dir' => MTPHR_EMAILCUSTOMIZER_DIR . 'includes/mtphr-settings',
-//   'settings_url' => MTPHR_EMAILCUSTOMIZER_URL . 'includes/mtphr-settings',
-// ] );
-
+/**
+ * Initialize the settings
+ */
 function mtphr_settings_init( $data ) {
   $vendor_dir = isset( $data['vendor_dir'] ) ? trailingslashit( $data['vendor_dir'] ) : '';
   $vendor_url = isset( $data['vendor_url'] ) ? trailingslashit( $data['vendor_url'] ) : '';
@@ -27,33 +22,58 @@ function mtphr_settings_init( $data ) {
   $settings_url = isset( $data['settings_url'] ) ? trailingslashit( $data['settings_url'] ) : false;
   
   MTPHR_SETTINGS()->init( [
-    'id' => 'mtphrSettings',
+    'id' => 'mtphr',
     'textdomain' => 'mtphr-settings',
     'settings_dir' => $settings_dir ? $settings_dir : $vendor_dir . 'meta4creations/mtphr-settings',
     'settings_url' => $settings_url ? $settings_url : $vendor_url . 'meta4creations/mtphr-settings',
   ] );
 }
 
+/**
+ * Add an admin page
+ */
 function mtphr_settings_add_admin_page( $data ) {
   MTPHR_SETTINGS()->add_admin_page( $data );
 }
 
+/**
+ * Add a section
+ */
 function mtphr_settings_add_section( $data ) {
   MTPHR_SETTINGS()->add_section( $data );
 }
 
+/**
+ * Add default values
+ */
 function mtphr_settings_add_default_values( $option, $data ) {
   MTPHR_SETTINGS()->add_default_values( $option, $data );
 }
 
+/**
+ * Add sanitize settings
+ */
 function mtphr_settings_add_sanitize_settings( $option, $data ) {
   MTPHR_SETTINGS()->add_default_values( $option, $data );
 }
 
+/**
+ * Add encryption settings
+ */
+function mtphr_settings_add_encryption_settings( $option, $data ) {
+  MTPHR_SETTINGS()->add_encryption_settings( $option, $data );
+}
+
+/**
+ * Add fields
+ */
 function mtphr_settings_add_fields( $data ) {
   MTPHR_SETTINGS()->add_fields( $data );
 }
 
+/**
+ * Get an option value
+ */
 function mtphr_settings_get_option_value( $option, $key = false ) {
   if ( $values = MTPHR_SETTINGS()->get_option_values( $option ) ) {
     if ( $key ) {
@@ -66,6 +86,9 @@ function mtphr_settings_get_option_value( $option, $key = false ) {
   }
 }
 
+/**
+ * Set an option value
+ */
 function mtphr_settings_set_option_value( $option, $key, $value = false ) {
   if ( is_array( $key ) ) {
     $updated_values = $key;

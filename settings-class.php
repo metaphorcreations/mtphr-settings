@@ -28,7 +28,7 @@ final class Settings {
   private $encryption_settings = [];
   private $type_settings = [];
   private $noupdate_settings = [];
-  private $default_sanitizer = 'sanitize_text_field';
+  private $default_sanitizer = 'wp_kses_post';
   private $encryption_key_1 = '7Q@_DvLVTiHPEA';
   private $encryption_key_2 = 'YgM2iCX-BtoBpJ';
 
@@ -568,6 +568,27 @@ final class Settings {
   }
 
   /**
+   * Get default values
+   */
+  public function get_default_values( $options = false ) {
+    $default_values = self::$instance->default_values;
+    if ( $options ) {
+      if ( is_array( $options ) ) {
+        if ( ! empty( $options ) ) {
+          $values = [];
+          foreach ( $options as $option ) {
+            $values[$option] = isset( $default_values[$option] ) ? $default_values[$option] : [];
+          }
+          return $values;
+        }
+      } else {
+        return isset( $default_values[$options] ) ? $default_values[$options] : [];
+      }
+    }
+    return $default_values;
+  }
+
+  /**
    * Add sanitize settings
    */
   public function add_sanitize_settings( $option, $values = [] ) {
@@ -581,6 +602,27 @@ final class Settings {
     $sanitize_settings[$option] = $sanitize_option_settings;
     self::$instance->sanitize_settings = $sanitize_settings;
 
+    return $sanitize_settings;
+  }
+
+  /**
+   * Get sanitize settings
+   */
+  public function get_sanitize_settings( $options = false ) {
+    $sanitize_settings = self::$instance->sanitize_settings;
+    if ( $options ) {
+      if ( is_array( $options ) ) {
+        if ( ! empty( $options ) ) {
+          $settings = [];
+          foreach ( $options as $option ) {
+            $settings[$option] = isset( $sanitize_settings[$option] ) ? $sanitize_settings[$option] : [];
+          }
+          return $settings;
+        }
+      } else {
+        return isset( $sanitize_settings[$options] ) ? $sanitize_settings[$options] : [];
+      }
+    }
     return $sanitize_settings;
   }
 
@@ -607,50 +649,7 @@ final class Settings {
     }
     $encryption_settings[$option] = $encryption_option_settings;
     self::$instance->encryption_settings = $encryption_settings;
-
     return $encryption_settings;
-  }
-
-  /**
-   * Get default values
-   */
-  public function get_default_values( $options = false ) {
-    $default_values = self::$instance->default_values;
-    if ( $options ) {
-      if ( is_array( $options ) ) {
-        if ( ! empty( $options ) ) {
-          $values = [];
-          foreach ( $options as $option ) {
-            $values[$option] = isset( $default_values[$option] ) ? $default_values[$option] : [];
-          }
-          return $values;
-        }
-      } else {
-        return isset( $default_values[$options] ) ? $default_values[$options] : [];
-      }
-    }
-    return $default_values;
-  }
-
-  /**
-   * Get sanitize settings
-   */
-  public function get_sanitize_settings( $options = false ) {
-    $sanitize_settings = self::$instance->sanitize_settings;
-    if ( $options ) {
-      if ( is_array( $options ) ) {
-        if ( ! empty( $options ) ) {
-          $settings = [];
-          foreach ( $options as $option ) {
-            $settings[$option] = isset( $sanitize_settings[$option] ) ? $sanitize_settings[$option] : [];
-          }
-          return $settings;
-        }
-      } else {
-        return isset( $sanitize_settings[$options] ) ? $sanitize_settings[$options] : [];
-      }
-    }
-    return $sanitize_settings;
   }
 
   /**
@@ -750,6 +749,7 @@ final class Settings {
     }
     
     // If the option values have been compiled, return them
+    $cache = false;
     if ( isset( self::$instance->values[$option] ) && $cache ) {
       return self::$instance->values[$option];
     }
