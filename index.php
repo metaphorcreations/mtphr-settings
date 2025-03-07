@@ -42,8 +42,7 @@ if ( ! function_exists( 'MTPHR_SETTINGS' ) ) {
    * Add a section
    */
   function mtphr_settings_add_section( $data ) {
-    $sections = MTPHR_SETTINGS()->add_section( $data );
-    //echo '<pre>';print_r($sections);echo '</pre>';
+    MTPHR_SETTINGS()->add_section( $data );
   }
 
   /**
