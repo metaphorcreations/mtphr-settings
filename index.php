@@ -4,6 +4,8 @@ use Mtphr\Settings;
 require_once __DIR__ . '/settings-class.php';
 
 add_action( 'plugins_loaded', __NAMESPACE__ . 'initialize_settings' );
+add_action( 'rest_api_init', __NAMESPACE__ . 'initialize_settings' );
+add_action( 'init', __NAMESPACE__ . 'initialize_fields' );
 
 /**
  * Get things started
@@ -18,26 +20,14 @@ MTPHR_SETTINGS();
  * Let other scripts know the settings are ready
  */
 function initialize_settings() {
-  do_action( 'mtphrSettings/init' );
+  do_action( 'mtphrSettings/init_settings' );
 }
 
-
-
 /**
- * Initialize the settings
+ * Let other scripts know they can initialize fields
  */
-function mtphr_settings_init( $data ) {
-  $vendor_dir = isset( $data['vendor_dir'] ) ? trailingslashit( $data['vendor_dir'] ) : '';
-  $vendor_url = isset( $data['vendor_url'] ) ? trailingslashit( $data['vendor_url'] ) : '';
-  $settings_dir = isset( $data['settings_dir'] ) ? trailingslashit( $data['settings_dir'] ) : false;
-  $settings_url = isset( $data['settings_url'] ) ? trailingslashit( $data['settings_url'] ) : false;
-  
-  MTPHR_SETTINGS()->init( [
-    'id' => 'mtphr',
-    'textdomain' => 'mtphr-settings',
-    'settings_dir' => $settings_dir ? $settings_dir : $vendor_dir . 'meta4creations/mtphr-settings',
-    'settings_url' => $settings_url ? $settings_url : $vendor_url . 'meta4creations/mtphr-settings',
-  ] );
+function initialize_fields() {
+  do_action( 'mtphrSettings/init_fields' );
 }
 
 /**
@@ -65,7 +55,7 @@ function mtphr_settings_add_default_values( $option, $data ) {
  * Add sanitize settings
  */
 function mtphr_settings_add_sanitize_settings( $option, $data ) {
-  MTPHR_SETTINGS()->add_default_values( $option, $data );
+  MTPHR_SETTINGS()->add_sanitize_settings( $option, $data );
 }
 
 /**

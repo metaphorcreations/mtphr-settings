@@ -1,9 +1,4 @@
 <?php
-/**
- * Version: 1.0.0
- */
-
-// Update the namespace after every update!!!
 namespace Mtphr;
 
 /**
@@ -13,6 +8,7 @@ final class Settings {
 
   private static $instance;
 
+  private $version = '1.0.0';
   private $id = 'mtphr';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -41,6 +37,10 @@ final class Settings {
       add_action( 'admin_menu', array( self::$instance, 'create_admin_pages' ) );
       add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_scripts' ) );
       add_action( 'rest_api_init', array( self::$instance, 'register_routes' ) );
+
+      list( $path, $url ) = self::$instance->get_path( dirname( dirname( __FILE__ ) ) );
+      self::$instance->settings_dir = $path . 'mtphr-settings/';
+      self::$instance->settings_url = $url . 'mtphr-settings/';
     }
     return self::$instance;
   }
@@ -59,23 +59,29 @@ final class Settings {
 		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', self::$instance->textdomain ), '1.0.0' );
 	}
 
-  /**
-   * Set a custom id for the settings
-   */
-  public function init( $args = [] ) {
-    if ( isset( $args['id'] ) ) {
-      self::$instance->id = esc_attr( str_replace( [' ', '-'], '', $args['id'] ) );
-    }
-    if ( isset( $args['textdomain'] ) ) {
-      self::$instance->textdomain = esc_attr( $args['textdomain'] );
-    }
-    if ( isset( $args['settings_dir'] ) ) {
-      self::$instance->settings_dir = esc_attr( trailingslashit( $args['settings_dir'] ) );
-    }
-    if ( isset( $args['settings_url'] ) ) {
-      self::$instance->settings_url = esc_url( trailingslashit( $args['settings_url'] ) );
-    }
-  }
+  private function get_path( $path = '' ) {
+		// Plugin base path.
+		$path       = wp_normalize_path( untrailingslashit( $path ) );
+		$themes_dir = wp_normalize_path( untrailingslashit( dirname( get_stylesheet_directory() ) ) );
+
+		// Default URL.
+		$url = plugins_url( '', $path . '/' . basename( $path ) . '.php' );
+
+		// Included into themes.
+		if (
+			0 !== strpos( $path, wp_normalize_path( WP_PLUGIN_DIR ) )
+			&& 0 !== strpos( $path, wp_normalize_path( WPMU_PLUGIN_DIR ) )
+			&& 0 === strpos( $path, $themes_dir )
+		) {
+			$themes_url = untrailingslashit( dirname( get_stylesheet_directory_uri() ) );
+			$url        = str_replace( $themes_dir, $themes_url, $path );
+		}
+
+		$path = trailingslashit( $path );
+		$url  = trailingslashit( $url );
+
+		return array( $path, $url );
+	}
 
   /**
    * Init settings
@@ -867,7 +873,7 @@ final class Settings {
     );
 
     // Add a hook for other scripts to register custom fields
-    do_action( 'mtphrSettings/enqueueFields', self::$instance->get_id() . 'Registry' );
+    do_action( 'mtphrSettings/enqueue_fields', self::$instance->get_id() . 'Registry' );
 
     $asset_file = include( self::$instance->settings_dir . 'assets/build/mtphrSettings.asset.php' );
     wp_enqueue_style(
