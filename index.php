@@ -21,15 +21,20 @@ if ( ! function_exists( 'MTPHR_SETTINGS' ) ) {
    * Let other scripts know the settings are ready
    */
   function mtphr_settings_initialize_settings() {
-    do_action( 'mtphrSettings/init_settings' );
-    MTPHR_SETTINGS()->set_settings_ready( true );
+    if ( ! MTPHR_SETTINGS()->get_settings_ready() ) { 
+      do_action( 'mtphrSettings/init_settings' );
+      MTPHR_SETTINGS()->set_settings_ready( true );
+    }
   }
 
   /**
    * Let other scripts know they can initialize fields
    */
   function mtphr_settings_initialize_fields() {
-    do_action( 'mtphrSettings/init_fields' );
+    if ( ! MTPHR_SETTINGS()->get_fields_ready() ) { 
+      do_action( 'mtphrSettings/init_fields' );
+      MTPHR_SETTINGS()->set_fields_ready( true );
+    }
   }
 
   /**
