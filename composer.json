@@ -2,6 +2,7 @@
   "name": "meta4creations/mtphr-settings",
   "description": "Custom react settings for WordPress",
   "type": "library",
+  "version": "1.0.2",
   "authors": [
     {
       "name": "Metaphor Creations",
