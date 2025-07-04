@@ -37,6 +37,8 @@ const EddLicenseInput = ({
   const [licenseData, setLicenseData] = useState(license_data);
   const [notice, setNotice] = useState(null); // State for managing the notice
 
+  console.log("licenseData", licenseData);
+
   const { Fill } = createSlotFill(`${settingsId}Notices`);
   const Notification = () => {
     return (
@@ -59,13 +61,13 @@ const EddLicenseInput = ({
     let apiUrl = false;
     switch (type) {
       case "activate":
-        apiUrl = activate_url ? activate_url : false;
+        apiUrl = activate_url || false;
         break;
       case "deactivate":
-        apiUrl = deactivate_url ? deactivate_url : false;
+        apiUrl = deactivate_url || false;
         break;
       case "refresh":
-        apiUrl = refresh_url ? refresh_url : false;
+        apiUrl = refresh_url || false;
         break;
     }
     if (!apiUrl) {
@@ -144,15 +146,15 @@ const EddLicenseInput = ({
     return maskedString;
   };
 
-  const { baseControlProps, controlProps } = useBaseControlProps(field);
+  const { baseControlProps } = useBaseControlProps(field);
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>
       <VStack>
         <HStack alignment="left">
-          <Text>{`Status: ${licenseData.license}`}</Text>
-          {"valid" == licenseData.license && (
-            <Text>{`Expires: ${licenseData.expires}`}</Text>
+          <Text>{`Status: ${licenseData?.license || "N/A"}`}</Text>
+          {licenseData.license && "valid" == licenseData.license && (
+            <Text>{`Expires: ${licenseData?.expires || "N/A"}`}</Text>
           )}
         </HStack>
         <HStack wrap={false}>
