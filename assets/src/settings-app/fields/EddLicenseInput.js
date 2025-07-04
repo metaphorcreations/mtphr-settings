@@ -34,10 +34,8 @@ const EddLicenseInput = ({
   } = field;
 
   const [isUpdating, setIsUpdating] = useState(null);
-  const [licenseData, setLicenseData] = useState(license_data);
+  const [licenseData, setLicenseData] = useState(license_data ?? {});
   const [notice, setNotice] = useState(null); // State for managing the notice
-
-  console.log("licenseData", licenseData);
 
   const { Fill } = createSlotFill(`${settingsId}Notices`);
   const Notification = () => {
