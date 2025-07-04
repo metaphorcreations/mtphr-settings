@@ -27,15 +27,21 @@ const EddLicenseInput = ({
   const {
     class: className,
     id,
-    license_data = {},
+    license_data,
     activate_url,
     deactivate_url,
     refresh_url,
   } = field;
 
   const [isUpdating, setIsUpdating] = useState(null);
-  const [licenseData, setLicenseData] = useState(license_data ?? {});
   const [notice, setNotice] = useState(null); // State for managing the notice
+  const [licenseData, setLicenseData] = useState(
+    license_data &&
+      typeof license_data === "object" &&
+      !Array.isArray(license_data)
+      ? license_data
+      : {}
+  );
 
   const { Fill } = createSlotFill(`${settingsId}Notices`);
   const Notification = () => {
