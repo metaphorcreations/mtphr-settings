@@ -14,6 +14,8 @@ export const shouldRenderField = (field, values) => {
       includes: Array.isArray(currentValue) && currentValue.includes(showValue),
       excludes:
         Array.isArray(currentValue) && !currentValue.includes(showValue),
+      isEmpty: Array.isArray(currentValue) && currentValue.length === 0,
+      isNotEmpty: Array.isArray(currentValue) && currentValue.length > 0,
     };
 
     if (!showConditions[compare]) return false; // Don't render if 'show' condition fails
@@ -34,6 +36,8 @@ export const shouldRenderField = (field, values) => {
       includes: Array.isArray(currentValue) && currentValue.includes(hideValue),
       excludes:
         Array.isArray(currentValue) && !currentValue.includes(hideValue),
+      isEmpty: Array.isArray(currentValue) && currentValue.length === 0,
+      isNotEmpty: Array.isArray(currentValue) && currentValue.length > 0,
     };
 
     if (hideConditions[compare]) return false; // Don't render if 'hide' condition matches

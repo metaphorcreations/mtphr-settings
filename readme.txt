@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 1.0.4 [2025-07-06] =
+* Conditional field updates
+
 = 1.0.3 [2025-07-04] =
 * EddLicenseInput.js bug fixes
 

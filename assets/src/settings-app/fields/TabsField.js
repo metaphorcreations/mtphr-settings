@@ -1,13 +1,22 @@
 import { TabPanel } from "@wordpress/components";
-import Field from "./Field";
 import { useEffect, useState } from "@wordpress/element";
+import Field from "./Field";
+import { shouldRenderField } from "../utils/fieldVisibility";
 
 const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
   const { tabs } = field;
 
+  // Only show enabled tabs
+  const enabledTabs = tabs.reduce((enabled, tab) => {
+    if (shouldRenderField(tab, values)) {
+      enabled.push(tab);
+    }
+    return enabled;
+  }, []);
+
   // Get the initial tab from the URL or default to the first tab
   const params = new URLSearchParams(window.location.search);
-  const initialSubTab = params.get(field.id) || tabs[0].id;
+  const initialSubTab = params.get(field.id) || enabledTabs[0].id;
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
 
   useEffect(() => {
@@ -34,7 +43,7 @@ const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
     <div className={`mtphrSettings__field--tabs__wrapper`}>
       <TabPanel
         activeClass="is-active"
-        tabs={tabs.map(({ id, label }) => ({
+        tabs={enabledTabs.map(({ id, label }) => ({
           name: id,
           title: label,
         }))}
@@ -42,23 +51,27 @@ const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
         onSelect={(tabName) => setActiveSubTab(tabName)}
       >
         {(tab) => {
-          const currentTab = tabs.find(({ id }) => id === tab.name);
+          const currentTab = enabledTabs.find(({ id }) => id === tab.name);
 
           return (
             <div
               className={`mtphrSettings__field--tabs__content mtphrSettings__field--tabs__content--${tab.name}`}
             >
-              {currentTab.fields.map((tabField, index) => (
-                <Field
-                  key={tabField.id ? tabField.id : index}
-                  field={tabField}
-                  value={values[tabField.id] || ""}
-                  onChange={onChange}
-                  values={values}
-                  settingsOption={settingsOption}
-                  settingsId={settingsId}
-                />
-              ))}
+              {currentTab.fields.map((tabField, index) => {
+                if (!shouldRenderField(tabField, values)) return null; // Don't render if conditions fail
+
+                return (
+                  <Field
+                    key={tabField.id ? tabField.id : index}
+                    field={tabField}
+                    value={values[tabField.id] || ""}
+                    onChange={onChange}
+                    values={values}
+                    settingsOption={settingsOption}
+                    settingsId={settingsId}
+                  />
+                );
+              })}
             </div>
           );
         }}
