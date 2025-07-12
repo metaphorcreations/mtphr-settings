@@ -168,6 +168,7 @@ const EddLicenseInput = ({
               value={maskedLicense()}
               onChange={onChangeHandler}
               __nextHasNoMarginBottom
+              __next40pxDefaultSize
             />
           </Spacer>
           <ButtonGroup>

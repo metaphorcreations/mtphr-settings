@@ -32,6 +32,7 @@ const TextInput = ({ field, value, settingsOption, onChange }) => {
       suffix={suffix}
       type={type}
       value={value}
+      __next40pxDefaultSize
     />
   );
 };
