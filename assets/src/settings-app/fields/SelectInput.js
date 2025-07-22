@@ -52,6 +52,7 @@ const SelectInput = ({ field, value, settingsOption, onChange }) => {
       variant={variant}
       disabled={disabled}
       __nextHasNoMarginBottom
+      __next40pxDefaultSize
     />
   );
 };
