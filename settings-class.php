@@ -921,7 +921,7 @@ final class Settings {
       self::$instance->get_id(),
       self::$instance->settings_url . 'assets/build/mtphrSettings.css',
       ['wp-components'],
-      $asset_file['version']
+      filemtime( self::$instance->settings_dir . 'assets/build/mtphrSettings.css' ),
     );
     wp_enqueue_script(
       self::$instance->get_id(),
