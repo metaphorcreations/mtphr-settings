@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 1.0.6 [2025-07-24] =
+* Top level settings page bug fix
+
 = 1.0.5 [2025-07-21] =
 * Field style updates
 * Root admin menu page updates
