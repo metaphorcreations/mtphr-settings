@@ -317,17 +317,21 @@ final class Settings {
     }
 
     // Check if top level and slug already exists
-    if ( ! isset( $sections['parent_slug'] ) ) {
-      if ( in_array( $section['menu_slug'], array_column( array_filter( $sections, fn( $s ) => ! isset( $s['parent_slug'] ) ), 'menu_slug' ) ) ) {
+    if ( ! isset( $section['parent_slug'] ) ) {
+      $exists = array_filter( $sections, function ( $s ) use ( $section ) {
+        return $s['menu_slug'] === $section['menu_slug'] 
+          && $s['id'] === $section['id'];
+      } );
+      if ( ! empty( $exists ) ) {
         return false;
       }
 
     // Check if submenu and same slug exists with same parent
     } else {
       $exists = array_filter( $sections, function ( $s ) use ( $section ) {
-        return isset( $s['parent_slug'] ) 
-          && $s['parent_slug'] === $section['parent_slug'] 
-          && $s['menu_slug'] === $section['menu_slug'];
+        return $s['parent_slug'] === $section['parent_slug'] 
+          && $s['menu_slug'] === $section['menu_slug']
+          && $s['id'] === $section['id'];
       } );
       if ( ! empty( $exists ) ) {
         return false;
