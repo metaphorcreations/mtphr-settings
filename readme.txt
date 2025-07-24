@@ -5,7 +5,7 @@
 
 = 1.0.5 [2025-07-21] =
 * Field style updates
-* Root admin menu page updates
+* Top level settings page updates
 
 = 1.0.4 [2025-07-06] =
 * Conditional field updates
