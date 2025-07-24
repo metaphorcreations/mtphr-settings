@@ -422,6 +422,11 @@ final class Settings {
 
     if ( ! isset( $setting['option'] ) ) {
       $section = self::$instance->get_section( $setting['section'] );
+      if ( ! $section ) {
+        $message = "<p>Section <strong>{$setting['section']}</strong> does not exist.</p>";
+        self::$instance->add_admin_notice( 'error', $message );
+        return false;
+      }
       $setting['option'] = $section['option'];
     }
     
