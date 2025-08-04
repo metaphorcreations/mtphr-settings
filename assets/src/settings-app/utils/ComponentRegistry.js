@@ -1,3 +1,7 @@
+// ComponentRegistry.js
+
+import { shouldRenderField } from "./fieldVisibility"; // Adjust path as needed
+
 // Global Component Registry
 const componentRegistry = {};
 
@@ -13,14 +17,18 @@ export const registerComponent = (type, component) => {
 /**
  * Get the component associated with a field type.
  * @param {string} type - The field type.
- * @returns {React.Component} - The registered component.
+ * @returns {React.Component|null} - The registered component.
  */
 export const getComponent = (type) => {
   return componentRegistry[type] || null;
 };
 
-// Expose globally
-window.mtphrSettingsRegistry = {
-  registerComponent,
-  getComponent,
-};
+// Initialize global registry (if not already set)
+window.mtphrSettingsRegistry = window.mtphrSettingsRegistry || {};
+
+// Expose component-related methods
+window.mtphrSettingsRegistry.registerComponent = registerComponent;
+window.mtphrSettingsRegistry.getComponent = getComponent;
+
+// Expose utilities
+window.mtphrSettingsRegistry.shouldRenderField = shouldRenderField;

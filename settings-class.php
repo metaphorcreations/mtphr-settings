@@ -315,6 +315,9 @@ final class Settings {
     if ( ! isset( $section['order'] ) ) {
       $section['order'] = $order;
     }
+    if ( ! isset( $section['type'] ) ) {
+      $section['type'] = 'primary';
+    }
 
     // Check if top level and slug already exists
     if ( ! isset( $section['parent_slug'] ) ) {

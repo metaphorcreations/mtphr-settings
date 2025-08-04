@@ -17,6 +17,7 @@ const Field = ({
   values,
   settingsOption,
   settingsId,
+  sections,
 }) => {
   const { container, inline } = field;
   const { isBorderless, padding } = container || {};
@@ -63,6 +64,7 @@ const Field = ({
           values={values}
           settingsOption={settingsOption}
           settingsId={settingsId}
+          sections={sections}
         />
       </CardBody>
     </Card>

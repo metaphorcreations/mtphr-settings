@@ -12,6 +12,7 @@ const GroupField = ({
   values,
   settingsOption,
   settingsId,
+  sections,
 }) => {
   const {
     alignment,
@@ -54,6 +55,7 @@ const GroupField = ({
             values={values}
             settingsOption={settingsOption}
             settingsId={settingsId}
+            sections={sections}
           />
         );
       })}

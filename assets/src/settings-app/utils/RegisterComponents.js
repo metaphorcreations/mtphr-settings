@@ -7,6 +7,7 @@ import CheckboxesInput from "../fields/CheckboxesInput";
 import ColorInput from "../fields/ColorInput";
 import CustomHTMLInput from "../fields/CustomHTMLInput";
 import EddLicenseInput from "../fields/EddLicenseInput";
+import Field from "../fields/Field";
 import GroupField from "../fields/GroupField";
 import HeadingField from "../fields/HeadingField";
 import MappingField from "../fields/MappingField";
@@ -26,6 +27,7 @@ if (registerComponent) {
   registerComponent("checkbox", CheckboxInput);
   registerComponent("checkboxes", CheckboxesInput);
   registerComponent("edd_license", EddLicenseInput);
+  registerComponent("field", Field);
   registerComponent("group", GroupField);
   registerComponent("heading", HeadingField);
   registerComponent("mapping", MappingField);
