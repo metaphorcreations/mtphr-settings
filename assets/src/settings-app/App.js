@@ -266,6 +266,7 @@ export default ({ settingsId, settingsTitle }) => {
   return (
     <SlotFillProvider>
       <Card
+        isRounded={false}
         className={`mtphrSettings ${settingsId}`}
         style={{ position: "relative" }}
       >
