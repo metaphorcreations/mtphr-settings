@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.0.2';
+  private $version = '1.0.7';
   private $id = 'mtphr';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -1213,6 +1213,10 @@ final class Settings {
    * Encrypt data
   */
   private function encrypt( $string = '', $custom_key_1 = null, $custom_key_2 = null ) {
+    if ( ! $string || '' === $string ) {
+      return $string;
+    }
+
     // Convert arrays to JSON so we can encrypt them as strings.
     if ( is_array( $string ) ) {
       $string = json_encode( $string );
@@ -1270,7 +1274,7 @@ final class Settings {
    */
   private function decrypt( $string, $custom_key_1 = null, $custom_key_2 = null ) {
     // If already an array, it might have been double-processed or not encrypted at all
-    if ( is_array( $string ) ) {
+    if ( is_array( $string ) || '' === $string ) {
       return $string;
     }
 

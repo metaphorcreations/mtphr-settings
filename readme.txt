@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.0.7 [2025-08-13] =
+* Added init_tab attribute to tabs field
+* Modified encryption functionality to not encrypt empty strings
+
 = 1.0.6 [2025-07-24] =
 * Top level settings page bug fix
 

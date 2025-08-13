@@ -16,7 +16,9 @@ const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
 
   // Get the initial tab from the URL or default to the first tab
   const params = new URLSearchParams(window.location.search);
-  const initialSubTab = params.get(field.id) || enabledTabs[0].id;
+  const initialSubTab =
+    params.get(field.id) || field.init_tab || enabledTabs[0].id;
+
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
 
   useEffect(() => {
