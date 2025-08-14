@@ -4,6 +4,7 @@ import {
   createSlotFill,
   Notice,
   useBaseControlProps,
+  __experimentalVStack as VStack,
 } from "@wordpress/components";
 const { useState } = wp.element;
 
@@ -31,15 +32,15 @@ const ButtonInput = ({ field, values, settingsOption, settingsId }) => {
   const Notification = () => {
     return (
       notice && (
-        <Fill>
-          <Notice
-            status={notice.status}
-            onRemove={() => setNotice(null)}
-            isDismissible
-          >
-            <div dangerouslySetInnerHTML={{ __html: notice.message }} />
-          </Notice>
-        </Fill>
+        //<Fill>
+        <Notice
+          status={notice.status}
+          onRemove={() => setNotice(null)}
+          isDismissible
+        >
+          <div dangerouslySetInnerHTML={{ __html: notice.message }} />
+        </Notice>
+        //</Fill>
       )
     );
   };
@@ -95,24 +96,26 @@ const ButtonInput = ({ field, values, settingsOption, settingsId }) => {
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>
-      <Button
-        className={className}
-        description={description}
-        disabled={isSaving && action?.type === "api"}
-        href={action?.type === "api" ? null : action.url}
-        icon={icon}
-        iconPosition={iconPosition}
-        iconSize={iconSize}
-        isBusy={isSaving}
-        isDestructive={isDestructive}
-        isLink={isLink}
-        onClick={onClickHandler}
-        size={size}
-        target={target}
-        text={text}
-        variant={variant}
-      />
-      <Notification />
+      <VStack alignment="left">
+        <Button
+          className={className}
+          description={description}
+          disabled={isSaving && action?.type === "api"}
+          href={action?.type === "api" ? null : action.url}
+          icon={icon}
+          iconPosition={iconPosition}
+          iconSize={iconSize}
+          isBusy={isSaving}
+          isDestructive={isDestructive}
+          isLink={isLink}
+          onClick={onClickHandler}
+          size={size}
+          target={target}
+          text={text}
+          variant={variant}
+        />
+        <Notification />
+      </VStack>
     </BaseControl>
   );
 };
