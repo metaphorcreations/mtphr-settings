@@ -942,7 +942,8 @@ final class Settings {
       filemtime( self::$instance->settings_dir . 'assets/build/mtphrSettings.js' ),
       true
     ); 
-    wp_add_inline_script( self::$instance->get_id(), self::$instance->get_id() . 'Vars = ' . json_encode( array(
+
+    wp_add_inline_script( self::$instance->get_id(), self::$instance->get_id() . 'Vars = ' . wp_json_encode( array(
       'siteUrl'        => site_url(),
       'restUrl'        => esc_url_raw( rest_url( self::$instance->get_id() . '\/v1/' ) ),
       'values'         => $values,
