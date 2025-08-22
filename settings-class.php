@@ -1136,41 +1136,62 @@ final class Settings {
   }
 
   /**
-   * Loop through an array and sanitize values
+   * Apply a sanitizer to a scalar value.
+   * Handles core simple sanitizers, 'none', custom callbacks, and fallback default.
    */
-  private function loop_sanitize_value( $value, $sanitizer ) { 
-    $sanitized_value = [];
-    if ( is_array( $value ) && ! empty( $value ) ) {
-      foreach ( $value as $key => $val ) {
-        $sanitized_value[$key] = $sanitizer( $val );
-      }
-    }
-    return $sanitized_value;
-  }
-
-  /**
-   * Sanitize a value
-   */
-  private function sanitize_value( $value, $sanitizer, $key, $option, $type = false ) { 
-    switch( $sanitizer ) {
+  private function apply_sanitizer( $sanitizer, $value, $key, $option, $type ) {
+    switch ( $sanitizer ) {
       case 'esc_attr':
       case 'sanitize_text_field':
       case 'wp_kses_post':
       case 'intval':
       case 'floatval':
       case 'boolval':
-        return is_array( $value ) ? self::$instance->loop_sanitize_value( $value, $sanitizer ) : $sanitizer( $value );
+        return $sanitizer( $value );
+
       case 'none':
         return $value;
+
       default:
-        if ( function_exists( $sanitizer ) ) {
-          return $sanitizer( $value, $key, $option, $type );
-        } else {
-          $default = self::$instance->get_default_sanitizer();
-          return is_array( $value ) ? self::$instance->loop_sanitize_value( $value, $default ) : $default( $value );
+        if ( is_callable( $sanitizer ) ) {
+          // Custom sanitizer gets full context.
+          return call_user_func( $sanitizer, $value, $key, $option, $type );
         }
-        break;
+
+        // Fallback to your default sanitizer.
+        $default = self::$instance->get_default_sanitizer();
+        return is_callable( $default ) ? $default( $value ) : $value;
     }
+  }
+
+  /**
+   * Recursively sanitize arrays of any depth.
+   */
+  private function loop_sanitize_value( $value, $sanitizer, $key, $option, $type = false ) {
+    $sanitized = [];
+
+    foreach ( (array) $value as $k => $v ) {
+      if ( is_array( $v ) ) {
+        $sanitized[ $k ] = $this->loop_sanitize_value( $v, $sanitizer, $key, $option, $type );
+      } else {
+        $sanitized[ $k ] = $this->apply_sanitizer( $sanitizer, $v, $key, $option, $type );
+      }
+    }
+
+    return $sanitized;
+  }
+
+  /**
+   * Sanitize a value (scalar or multi-level array).
+   */
+  private function sanitize_value( $value, $sanitizer, $key, $option, $type = false ) {
+    // If it's an array, recurse no matter which sanitizer we use.
+    if ( is_array( $value ) ) {
+      return $this->loop_sanitize_value( $value, $sanitizer, $key, $option, $type );
+    }
+
+    // Scalar: just apply.
+    return $this->apply_sanitizer( $sanitizer, $value, $key, $option, $type );
   }
 
   /**

@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.0.8 [2025-08-22] =
+* Checkboxes field update to allow basic array choices
+* Multilevel sanitize value updates
+
 = 1.0.7 [2025-08-14] =
 * Added init_tab attribute to tabs field
 * Modified encryption functionality to not encrypt empty strings
