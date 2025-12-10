@@ -1,3 +1,4 @@
+import he from "he";
 import {
   BaseControl,
   useBaseControlProps,
@@ -11,7 +12,7 @@ const HeadingField = ({ field }) => {
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>
-      <Heading level={level}>{label}</Heading>
+      <Heading level={level}>{label ? he.decode(label) : label}</Heading>
     </BaseControl>
   );
 };

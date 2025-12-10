@@ -10,7 +10,7 @@ const NumberInput = ({ field, value, settingsOption, onChange }) => {
 
   return (
     <NumberControl
-      label={label}
+      label={label ? he.decode(label) : label}
       help={help ? he.decode(help) : false}
       min={min}
       max={max}

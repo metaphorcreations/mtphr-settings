@@ -1,3 +1,4 @@
+import he from "he";
 import { TabPanel } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";
 import Field from "./Field";
@@ -47,7 +48,7 @@ const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
         activeClass="is-active"
         tabs={enabledTabs.map(({ id, label }) => ({
           name: id,
-          title: label,
+          title: label ? he.decode(label) : label,
         }))}
         initialTabName={initialSubTab}
         onSelect={(tabName) => setActiveSubTab(tabName)}

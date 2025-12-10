@@ -1,3 +1,4 @@
+import he from "he";
 const { __ } = wp.i18n;
 import {
   BaseControl,
@@ -150,7 +151,11 @@ const EddLicenseInput = ({
     return maskedString;
   };
 
-  const { baseControlProps } = useBaseControlProps(field);
+  const { baseControlProps } = useBaseControlProps({
+    ...field,
+    label: field.label ? he.decode(field.label) : field.label,
+    help: field.help ? he.decode(field.help) : field.help,
+  });
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>

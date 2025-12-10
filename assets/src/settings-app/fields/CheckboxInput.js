@@ -1,4 +1,5 @@
 // CheckboxInput.js
+import he from "he";
 import { CheckboxControl } from "@wordpress/components";
 
 const CheckboxInput = ({ field, value, settingsOption, onChange }) => {
@@ -10,8 +11,8 @@ const CheckboxInput = ({ field, value, settingsOption, onChange }) => {
 
   return (
     <CheckboxControl
-      label={label}
-      help={help}
+      label={label ? he.decode(label) : label}
+      help={help ? he.decode(help) : help}
       checked={value}
       onChange={onChangeHandler}
       __nextHasNoMarginBottom

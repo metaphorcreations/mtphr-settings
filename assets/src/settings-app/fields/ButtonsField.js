@@ -1,3 +1,4 @@
+import he from "he";
 import {
   BaseControl,
   useBaseControlProps,
@@ -17,7 +18,11 @@ const ButtonsField = ({ field, values, settingsOption, settingsId }) => {
     buttons,
   } = field;
 
-  const { baseControlProps } = useBaseControlProps(field);
+  const { baseControlProps } = useBaseControlProps({
+    ...field,
+    label: field.label ? he.decode(field.label) : field.label,
+    help: field.help ? he.decode(field.help) : field.help,
+  });
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>

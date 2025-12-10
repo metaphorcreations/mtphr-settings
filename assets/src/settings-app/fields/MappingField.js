@@ -1,3 +1,4 @@
+import he from "he";
 import { __ } from "@wordpress/i18n";
 import {
   BaseControl,
@@ -25,8 +26,8 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
   const [mappedValues, setMappedValues] = useState(() => {
     return map_source.map((item) => ({
       id: item.id,
-      label: item.label || item.id,
-      help: item.help,
+      label: item.label ? he.decode(item.label || item.id) : (item.label || item.id),
+      help: item.help ? he.decode(item.help) : item.help,
       value: value[item.id] || "",
     }));
   });
@@ -57,7 +58,7 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
   const availableChoices = (currentValue) =>
     map_choices.map((choice) => ({
       value: choice.id,
-      label: choice.label,
+      label: choice.label ? he.decode(choice.label) : choice.label,
       disabled: mappedValues.some(
         (mapping) =>
           mapping.value === choice.id && mapping.value !== currentValue
@@ -92,7 +93,7 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
   };
 
   return (
-    <BaseControl label={label} help={help} id={id} __nextHasNoMarginBottom>
+    <BaseControl label={label ? he.decode(label) : label} help={help ? he.decode(help) : help} id={id} __nextHasNoMarginBottom>
       <VStack spacing="10px">
         <HStack alignment="topLeft">
           <div
@@ -101,9 +102,9 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
             }}
           >
             <label style={headingStyles}>
-              {source_label || __("Source", "mtphr-settings")}
+              {source_label ? he.decode(source_label) : __("Source", "mtphr-settings")}
             </label>
-            {source_help && <p style={helpStyles}>{source_help}</p>}
+            {source_help && <p style={helpStyles}>{he.decode(source_help)}</p>}
           </div>
           <div
             style={{
@@ -111,9 +112,9 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
             }}
           >
             <label style={headingStyles}>
-              {choices_label || __("Choices", "mtphr-settings")}
+              {choices_label ? he.decode(choices_label) : __("Choices", "mtphr-settings")}
             </label>
-            {choices_help && <p style={helpStyles}>{choices_help}</p>}
+            {choices_help && <p style={helpStyles}>{he.decode(choices_help)}</p>}
           </div>
         </HStack>
         {mappedValues.map((item) => (

@@ -1,3 +1,4 @@
+import he from "he";
 import { SelectControl } from "@wordpress/components";
 
 const SelectInput = ({ field, value, settingsOption, onChange }) => {
@@ -30,7 +31,7 @@ const SelectInput = ({ field, value, settingsOption, onChange }) => {
     if (typeof choices === "object" && choices !== null) {
       return Object.entries(choices).map(([value, label]) => ({
         value,
-        label,
+        label: typeof label === 'string' ? he.decode(label) : label,
       }));
     }
 
@@ -41,9 +42,9 @@ const SelectInput = ({ field, value, settingsOption, onChange }) => {
   return (
     <SelectControl
       className={className}
-      label={label}
+      label={label ? he.decode(label) : label}
       labelPosition={labelPosition}
-      help={help}
+      help={help ? he.decode(help) : help}
       onChange={onChangeHandler}
       multiple={multiple}
       name={id}

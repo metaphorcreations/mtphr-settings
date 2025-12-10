@@ -1,4 +1,5 @@
 // CheckboxesInput.js
+import he from "he";
 import {
   BaseControl,
   CheckboxControl,
@@ -69,7 +70,11 @@ const CheckboxesInput = ({ field, value, settingsOption, onChange }) => {
   };
 
   // Get standard control props (label, help, etc.) for BaseControl
-  const { baseControlProps } = useBaseControlProps(field);
+  const { baseControlProps } = useBaseControlProps({
+    ...field,
+    label: field.label ? he.decode(field.label) : field.label,
+    help: field.help ? he.decode(field.help) : field.help,
+  });
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>
@@ -79,11 +84,12 @@ const CheckboxesInput = ({ field, value, settingsOption, onChange }) => {
           // - if choices is an array: the label IS the value
           // - if choices is an object: the object key is the value
           const choiceVal = useValueKeys ? choiceLabel : choice;
+          const decodedLabel = typeof choiceLabel === 'string' ? he.decode(choiceLabel) : choiceLabel;
 
           return (
             <CheckboxControl
               key={choiceVal}
-              label={choiceLabel}
+              label={decodedLabel}
               checked={Array.isArray(value) ? value.includes(choiceVal) : false}
               onChange={(checked) => onChangeHandler(checked, choiceVal)}
               disabled={disabled}

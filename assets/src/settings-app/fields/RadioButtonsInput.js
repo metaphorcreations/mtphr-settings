@@ -1,4 +1,5 @@
 // RadioButtonsInput.js
+import he from "he";
 import { RadioControl } from "@wordpress/components";
 
 const RadioButtonsInput = ({ field, value, settingsOption, onChange }) => {
@@ -21,7 +22,7 @@ const RadioButtonsInput = ({ field, value, settingsOption, onChange }) => {
     if (typeof choices === "object" && choices !== null) {
       return Object.entries(choices).map(([value, label]) => ({
         value,
-        label,
+        label: typeof label === 'string' ? he.decode(label) : label,
       }));
     }
 
@@ -32,8 +33,8 @@ const RadioButtonsInput = ({ field, value, settingsOption, onChange }) => {
   return (
     <RadioControl
       className={className}
-      label={label}
-      help={help}
+      label={label ? he.decode(label) : label}
+      help={help ? he.decode(help) : help}
       selected={value}
       options={formattedChoices()}
       onChange={onChangeHandler}

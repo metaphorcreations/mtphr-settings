@@ -1,3 +1,4 @@
+import he from "he";
 import classNames from "classnames";
 
 import {
@@ -50,7 +51,7 @@ const Field = ({
     >
       {field.type === "group" && field.label && (
         <CardHeader className={`$mtphrSettings__field__heading`}>
-          <Heading level={4}>{field.label}</Heading>
+          <Heading level={4}>{he.decode(field.label)}</Heading>
         </CardHeader>
       )}
       <CardBody

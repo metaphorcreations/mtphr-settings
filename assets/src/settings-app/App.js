@@ -1,3 +1,4 @@
+import he from "he";
 import { __ } from "@wordpress/i18n";
 import { useState, useEffect, useMemo } from "@wordpress/element";
 import {
@@ -13,6 +14,8 @@ import {
   __experimentalHeading as Heading,
   createSlotFill,
 } from "@wordpress/components";
+import { Icon } from "@wordpress/icons";
+import * as wpIcons from "@wordpress/icons";
 import { dispatch, useDispatch, useSelect } from "@wordpress/data";
 
 import Field from "./fields/Field";
@@ -42,7 +45,16 @@ export default ({ settingsId, settingsTitle }) => {
   /** @type {[{ status: string, message: string } | null, Function]} */
   const [notice, setNotice] = useState(null);
 
-  const { fields, field_sections: fieldSections } = settingVars;
+  const {
+    fields,
+    field_sections: fieldSections,
+    sidebar_items: sidebarItems = [],
+    sidebar_width: sidebarWidth = '320px',
+    main_max_width: mainMaxWidth = '1000px',
+    header_icon: headerIcon = '',
+    header_description: headerDescription = '',
+    header_version: headerVersion = ''
+  } = settingVars;
 
   /** @type {{ Fill: React.ComponentType, Slot: React.ComponentType }} */
   const { Fill, Slot } = createSlotFill(`${settingsId}Notices`);
@@ -146,7 +158,7 @@ export default ({ settingsId, settingsTitle }) => {
     return primarySections.map((section) => ({
       id: section.id,
       name: section.slug,
-      title: section.label,
+      title: section.label ? he.decode(section.label) : section.label,
     }));
   }, [primarySections]);
 
@@ -263,15 +275,119 @@ export default ({ settingsId, settingsTitle }) => {
       </Fill>
     ) : null;
 
+  /**
+   * Renders the header icon based on its type (URL, dashicon, or WordPress icon).
+   *
+   * @param {string} icon - Icon identifier (URL, dashicon class, or WordPress icon name)
+   * @param {string} alt - Alt text for the icon
+   * @returns {JSX.Element|null}
+   */
+  const renderHeaderIcon = (icon, alt) => {
+    if (!icon) return null;
+
+    // Check if it's a URL (http:// or https://)
+    if (icon.startsWith('http://') || icon.startsWith('https://')) {
+      return (
+        <img
+          src={icon}
+          alt={alt}
+          style={{ maxWidth: '48px', maxHeight: '48px', width: 'auto', height: 'auto' }}
+        />
+      );
+    }
+
+    // Check if it's a dashicon (starts with "dashicons-")
+    if (icon.startsWith('dashicons-')) {
+      return (
+        <span
+          className={`dashicons ${icon}`}
+          style={{ fontSize: '48px', width: '48px', height: '48px', lineHeight: '48px' }}
+          aria-label={alt}
+        />
+      );
+    }
+
+    // Otherwise, try to use it as a WordPress icon
+    // WordPress icons are exported as named exports, so we try to get it from wpIcons
+    const IconComponent = wpIcons[icon];
+    if (IconComponent) {
+      return (
+        <Icon
+          icon={IconComponent}
+          size={48}
+          style={{ width: '48px', height: '48px' }}
+        />
+      );
+    }
+
+    // If not found, return null
+    return null;
+  };
+
+  /**
+   * Renders the sidebar with sidebar items.
+   *
+   * @returns {JSX.Element|null}
+   */
+  const Sidebar = () => {
+    if (!sidebarItems || sidebarItems.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="mtphrSettings__sidebar" style={{ width: sidebarWidth }}>
+        {sidebarItems.map((item, i) => {
+          // Sidebar items don't need values/onChange since they're display-only
+          // But we still use the Field component for consistency
+          return (
+            <Field
+              key={item.id || i}
+              field={item}
+              value={item.std || ""}
+              onChange={() => {}} // No-op for sidebar items
+              values={{}}
+              settingsOption={""}
+              settingsId={settingsId}
+              sections={[]}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <SlotFillProvider>
-      <Card
-        isRounded={false}
-        className={`mtphrSettings ${settingsId}`}
-        style={{ position: "relative" }}
-      >
+      <div className="mtphrSettings__container">
+        <div className="mtphrSettings__main" style={{ maxWidth: mainMaxWidth }}>
+          <Card
+            isRounded={false}
+            className={`mtphrSettings ${settingsId}`}
+            style={{ position: "relative" }}
+          >
         <CardHeader>
-          <Heading level={1}>{settingsTitle}</Heading>
+          <div className="mtphrSettings__header">
+            {headerIcon && (
+              <div className="mtphrSettings__header-icon">
+                {renderHeaderIcon(headerIcon, settingsTitle ? he.decode(settingsTitle) : settingsTitle)}
+              </div>
+            )}
+            <div className="mtphrSettings__header-content">
+              <Heading className="mtphrSettings__header-title" style={{ padding: 0 }} level={1}>{settingsTitle ? he.decode(settingsTitle) : settingsTitle}</Heading>
+              {headerDescription && (
+                <p className="mtphrSettings__header-description">
+                  {he.decode(headerDescription)}
+                </p>
+              )}
+            </div>
+            {headerVersion && (
+              <div className="mtphrSettings__header-version">
+                <span className="mtphrSettings__version-badge">
+                  {he.decode(headerVersion)}
+                </span>
+              </div>
+            )}
+          </div>
         </CardHeader>
 
         {/* Toolbar Slot for top-level controls */}
@@ -343,6 +459,9 @@ export default ({ settingsId, settingsTitle }) => {
           onRemove={removeNotice}
         />
       </Card>
+        </div>
+        <Sidebar />
+      </div>
     </SlotFillProvider>
   );
 };

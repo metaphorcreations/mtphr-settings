@@ -1,3 +1,4 @@
+import he from "he";
 import {
   BaseControl,
   ColorPalette,
@@ -51,7 +52,11 @@ const ColorInput = ({ field, value = [], settingsOption, onChange }) => {
     }
   };
 
-  const { baseControlProps } = useBaseControlProps(field);
+  const { baseControlProps } = useBaseControlProps({
+    ...field,
+    label: field.label ? he.decode(field.label) : field.label,
+    help: field.help ? he.decode(field.help) : field.help,
+  });
 
   return (
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>

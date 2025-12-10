@@ -1,3 +1,4 @@
+import he from "he";
 import { TextareaControl } from "@wordpress/components";
 
 const TextAreaInput = ({ field, value, settingsOption, onChange }) => {
@@ -22,11 +23,11 @@ const TextAreaInput = ({ field, value, settingsOption, onChange }) => {
     <TextareaControl
       className={className}
       disabled={disabled}
-      help={help}
-      label={label}
+      help={help ? he.decode(help) : help}
+      label={label ? he.decode(label) : label}
       labelPosition={labelPosition}
       onChange={onChangeHandler}
-      placeholder={placeholder}
+      placeholder={placeholder ? he.decode(placeholder) : placeholder}
       prefix={prefix}
       rows={rows}
       suffix={suffix}

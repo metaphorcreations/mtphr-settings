@@ -24,7 +24,7 @@ const TextInput = ({ field, value, settingsOption, onChange }) => {
       className={className}
       disabled={disabled}
       help={help ? he.decode(help) : false}
-      label={label}
+      label={label ? he.decode(label) : label}
       labelPosition={labelPosition}
       onChange={onChangeHandler}
       placeholder={placeholder}

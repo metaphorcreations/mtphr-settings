@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.0.7';
+  private $version = '1.0.9';
   private $id = 'mtphr';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -27,6 +27,9 @@ final class Settings {
   private $type_settings = [];
   private $noupdate_settings = [];
   private $admin_notices = [];
+  private $sidebar_items = [];
+  private $sidebar_width = '320px';
+  private $main_content_max_width = '1000px';
   private $default_sanitizer = 'wp_kses_post';
   private $encryption_key_1 = '7Q@_DvLVTiHPEA';
   private $encryption_key_2 = 'YgM2iCX-BtoBpJ';
@@ -477,6 +480,54 @@ final class Settings {
   }
 
   /**
+   * Add sidebar
+   */
+  public function add_sidebar( $data ) {
+    if ( ! is_array( $data ) ) {
+      return false;
+    }
+    if ( ! isset( $data['items'] ) || ! is_array( $data['items'] ) ) {
+      return false;
+    }
+
+    // Store sidebar items
+    self::$instance->sidebar_items = $data['items'];
+
+    // Store sidebar width if provided
+    if ( isset( $data['width'] ) && ! empty( $data['width'] ) ) {
+      self::$instance->sidebar_width = esc_attr( $data['width'] );
+    }
+
+    // Store main content max-width if provided
+    if ( isset( $data['main_max_width'] ) && ! empty( $data['main_max_width'] ) ) {
+      self::$instance->main_content_max_width = esc_attr( $data['main_max_width'] );
+    }
+
+    return true;
+  }
+
+  /**
+   * Get sidebar items
+   */
+  public function get_sidebar_items() {
+    return self::$instance->sidebar_items;
+  }
+
+  /**
+   * Get sidebar width
+   */
+  public function get_sidebar_width() {
+    return self::$instance->sidebar_width;
+  }
+
+  /**
+   * Get main content max-width
+   */
+  public function get_main_content_max_width() {
+    return self::$instance->main_content_max_width;
+  }
+
+  /**
    * Return all settings
    */
   public function get_settings( $sections = false ) {
@@ -914,6 +965,22 @@ final class Settings {
     $settings = self::$instance->get_settings( $sections );
     $options = self::$instance->get_option_keys( $sections );
     $values = self::$instance->get_values( $options );
+    
+    // Get header metadata (icon, description, version) from admin page
+    // Only escape URL if it's actually a URL (starts with http:// or https://)
+    // Otherwise, pass it as-is for dashicons or WordPress icon names
+    $header_icon_raw = isset( $admin_page['header_icon'] ) ? $admin_page['header_icon'] : '';
+    $header_icon = '';
+    if ( $header_icon_raw ) {
+      if ( strpos( $header_icon_raw, 'http://' ) === 0 || strpos( $header_icon_raw, 'https://' ) === 0 ) {
+        $header_icon = esc_url( $header_icon_raw );
+      } else {
+        // For dashicons or WordPress icon names, pass as-is (but sanitize)
+        $header_icon = sanitize_text_field( $header_icon_raw );
+      }
+    }
+    $header_description = isset( $admin_page['header_description'] ) ? $admin_page['header_description'] : '';
+    $header_version = isset( $admin_page['header_version'] ) ? esc_html( $admin_page['header_version'] ) : '';
 
     // Load the Component Registry first
     $asset_file = include( self::$instance->settings_dir . 'assets/build/mtphrSettingsRegistry.asset.php' );
@@ -949,6 +1016,12 @@ final class Settings {
       'values'         => $values,
       'fields'         => $settings,
       'field_sections' => $sections,
+      'sidebar_items'  => self::$instance->get_sidebar_items(),
+      'sidebar_width'  => self::$instance->get_sidebar_width(),
+      'main_max_width' => self::$instance->get_main_content_max_width(),
+      'header_icon'    => $header_icon,
+      'header_description' => $header_description,
+      'header_version' => $header_version,
       'nonce'          => wp_create_nonce( 'wp_rest' )
     ) ), 'before' ) . ';';
   }
