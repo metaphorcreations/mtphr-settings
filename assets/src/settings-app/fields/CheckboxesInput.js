@@ -88,7 +88,7 @@ const CheckboxesInput = ({ field, value, settingsOption, onChange }) => {
 
           return (
             <CheckboxControl
-              key={choiceVal}
+              key={`${id || 'checkbox'}-${choiceVal}`}
               label={decodedLabel}
               checked={Array.isArray(value) ? value.includes(choiceVal) : false}
               onChange={(checked) => onChangeHandler(checked, choiceVal)}

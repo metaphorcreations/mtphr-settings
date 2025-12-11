@@ -69,7 +69,7 @@ const ColorInput = ({ field, value = [], settingsOption, onChange }) => {
         }}
       >
         {value.map((color, index) => (
-          <div key={index} style={{ position: "relative" }}>
+          <div key={`${id || 'color'}-${index}`} style={{ position: "relative" }}>
             <div
               onClick={() => {
                 if (colorIndex === index) {

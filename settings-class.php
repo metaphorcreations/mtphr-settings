@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.0.9';
+  private $version = '1.0.10';
   private $id = 'mtphr';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';

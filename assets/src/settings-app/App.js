@@ -325,6 +325,99 @@ export default ({ settingsId, settingsTitle }) => {
   };
 
   /**
+   * Validates all fields for duplicate IDs.
+   * Recursively checks main fields, sidebar items, and all nested fields (groups, tabs, buttons, etc.).
+   *
+   * @returns {Array<{id: string, contexts: string[], count: number}>} - Array of duplicate ID errors
+   */
+  const validateFieldIds = useMemo(() => {
+    const idCounts = new Map();
+    const idContexts = new Map();
+
+    /**
+     * Recursively collect all IDs from fields and nested structures
+     * @param {Array} items - Fields or items to validate
+     * @param {string} context - Context path for error messages
+     */
+    const collectIds = (items, context = "") => {
+      if (!Array.isArray(items)) return;
+
+      items.forEach((item, index) => {
+        if (item.id) {
+          if (!idCounts.has(item.id)) {
+            idCounts.set(item.id, 0);
+            idContexts.set(item.id, []);
+          }
+          idCounts.set(item.id, idCounts.get(item.id) + 1);
+          idContexts.get(item.id).push(context || "root");
+        }
+
+        // Recursively check nested group fields
+        if (item.type === "group" && Array.isArray(item.fields)) {
+          const groupContext = context 
+            ? `${context} > group '${item.id || `#${index}`}'`
+            : `group '${item.id || `#${index}`}'`;
+          collectIds(item.fields, groupContext);
+        }
+
+        // Recursively check nested tab fields
+        if (item.type === "tabs" && Array.isArray(item.tabs)) {
+          item.tabs.forEach((tab, tabIndex) => {
+            if (Array.isArray(tab.fields)) {
+              const tabContext = context
+                ? `${context} > tabs '${item.id || `#${index}`}' > tab '${tab.id || tab.label || `#${tabIndex}`}'`
+                : `tabs '${item.id || `#${index}`}' > tab '${tab.id || tab.label || `#${tabIndex}`}'`;
+              collectIds(tab.fields, tabContext);
+            }
+          });
+        }
+
+        // Recursively check nested button fields
+        if (item.type === "buttons" && Array.isArray(item.buttons)) {
+          item.buttons.forEach((button, buttonIndex) => {
+            if (button.id) {
+              const buttonContext = context
+                ? `${context} > buttons '${item.id || `#${index}`}' > button '${button.id}'`
+                : `buttons '${item.id || `#${index}`}' > button '${button.id}'`;
+              if (!idCounts.has(button.id)) {
+                idCounts.set(button.id, 0);
+                idContexts.set(button.id, []);
+              }
+              idCounts.set(button.id, idCounts.get(button.id) + 1);
+              idContexts.get(button.id).push(buttonContext);
+            }
+          });
+        }
+      });
+    };
+
+    // Validate main fields by section
+    sections.forEach((section) => {
+      const sectionContext = `section '${section.label || section.id}'`;
+      collectIds(section.fields, sectionContext);
+    });
+
+    // Validate sidebar items
+    if (Array.isArray(sidebarItems) && sidebarItems.length > 0) {
+      collectIds(sidebarItems, "sidebar");
+    }
+
+    // Find duplicates
+    const duplicates = [];
+    idCounts.forEach((count, id) => {
+      if (count > 1) {
+        duplicates.push({
+          id,
+          count,
+          contexts: idContexts.get(id),
+        });
+      }
+    });
+
+    return duplicates;
+  }, [sections, sidebarItems]);
+
+  /**
    * Renders the sidebar with sidebar items.
    *
    * @returns {JSX.Element|null}
@@ -341,7 +434,7 @@ export default ({ settingsId, settingsTitle }) => {
           // But we still use the Field component for consistency
           return (
             <Field
-              key={item.id || i}
+              key={`sidebar-${i}-${item.id || 'item'}`}
               field={item}
               value={item.std || ""}
               onChange={() => {}} // No-op for sidebar items
@@ -397,6 +490,31 @@ export default ({ settingsId, settingsTitle }) => {
 
         {/* Settings Form Body */}
         <CardBody className="mtphrSettings__form">
+          {validateFieldIds.length > 0 && (
+            <Notice
+              status="error"
+              isDismissible={false}
+              className="mtphrSettings__validation-error"
+              style={{ marginBottom: "16px" }}
+            >
+              <strong>{__("Duplicate Field ID Error", "mtphr-settings")}</strong>
+              <br />
+              {__("The following field IDs are used multiple times:", "mtphr-settings")}
+              <ul style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
+                {validateFieldIds.map((duplicate) => (
+                  <li key={duplicate.id}>
+                    <code>{duplicate.id}</code> {__("appears", "mtphr-settings")} {duplicate.count} {__("time(s)", "mtphr-settings")}
+                    {duplicate.contexts.length > 0 && (
+                      <span> ({duplicate.contexts.join(", ")})</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p style={{ margin: "8px 0 0 0", fontSize: "13px" }}>
+                {__("Each field must have a unique ID. Please update your settings configuration to use unique IDs for all fields.", "mtphr-settings")}
+              </p>
+            </Notice>
+          )}
           <TabPanel
             className="mtphrSettings__tabs"
             activeClass="is-active"
@@ -421,7 +539,7 @@ export default ({ settingsId, settingsTitle }) => {
 
                     return (
                       <Field
-                        key={id || i}
+                        key={`${option}-${id || i}`}
                         field={field}
                         value={values[option][id] || ""}
                         onChange={handleInputChange}

@@ -20,8 +20,18 @@ const Field = ({
   settingsId,
   sections,
 }) => {
-  const { container, inline } = field;
-  const { isBorderless, padding } = container || {};
+  // Apply default container settings for ad fields if not explicitly set
+  const containerDefaults = field.type === 'ad' 
+    ? { padding: '0', isBorderless: true }
+    : {};
+  
+  // Merge defaults with provided container settings (provided settings take precedence)
+  const container = field.container 
+    ? { ...containerDefaults, ...field.container }
+    : containerDefaults;
+  
+  const { isBorderless, padding, background, backgroundColor } = container;
+  const { inline } = field;
 
   const Component = getComponent(field.type);
 
@@ -41,13 +51,19 @@ const Field = ({
     { "mtphrSettings__field--inline": inline }
   );
 
+  // Build Card style object, including background color if provided
+  const cardStyle = {
+    flex: 1,
+    ...(background || backgroundColor ? { backgroundColor: background || backgroundColor } : {})
+  };
+
   return (
     <Card
       className={CardClassName}
       isRounded={false}
       size="small"
       isBorderless={isBorderless}
-      style={{ flex: 1 }}
+      style={cardStyle}
     >
       {field.type === "group" && field.label && (
         <CardHeader className={`$mtphrSettings__field__heading`}>

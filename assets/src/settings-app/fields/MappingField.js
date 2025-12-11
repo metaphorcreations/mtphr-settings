@@ -119,7 +119,7 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
         </HStack>
         {mappedValues.map((item) => (
           <HStack
-            key={item.id}
+            key={`${id || 'mapping'}-${item.id}`}
             spacing="10px"
             className="mapping-field-row"
             alignment="left"

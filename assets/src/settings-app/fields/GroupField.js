@@ -44,7 +44,7 @@ const GroupField = ({
 
         return (
           <Field
-            key={subField.id || index}
+            key={`${id || 'group'}-${index}-${subField.id || 'field'}`}
             field={subField}
             value={fieldValue}
             onChange={(data) => {

@@ -1,5 +1,6 @@
 const { registerComponent } = window.mtphrSettingsRegistry || {};
 
+import AdInput from "../fields/AdInput";
 import ButtonInput from "../fields/ButtonInput";
 import ButtonsField from "../fields/ButtonsField";
 import CheckboxInput from "../fields/CheckboxInput";
@@ -21,6 +22,7 @@ import TextInput from "../fields/TextInput";
 
 // Register built-in components
 if (registerComponent) {
+  registerComponent("ad", AdInput);
   registerComponent("button", ButtonInput);
   registerComponent("buttons", ButtonsField);
   registerComponent("color", ColorInput);

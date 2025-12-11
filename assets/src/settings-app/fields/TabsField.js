@@ -65,7 +65,7 @@ const TabsField = ({ field, onChange, values, settingsOption, settingsId }) => {
 
                 return (
                   <Field
-                    key={tabField.id ? tabField.id : index}
+                    key={`${field.id || 'tabs'}-${tab.name}-${tabField.id || index}`}
                     field={tabField}
                     value={values[tabField.id] || ""}
                     onChange={onChange}

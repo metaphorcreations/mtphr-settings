@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.0.10 [2025-12-11] =
+* Added Ad field
+* Field container updates
+
 = 1.0.9 [2025-12-10] =
 * Added sidebar functionality with configurable width and main content max-width
 * Added header icon support for URLs, dashicons, and WordPress icons

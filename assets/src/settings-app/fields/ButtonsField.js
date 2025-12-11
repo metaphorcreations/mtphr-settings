@@ -37,7 +37,7 @@ const ButtonsField = ({ field, values, settingsOption, settingsId }) => {
         {buttons.map((button, index) => {
           return (
             <ButtonInput
-              key={button.id || index}
+              key={`${field.id || 'buttons'}-${button.id || index}`}
               field={button}
               values={values}
               settingsOption={settingsOption}
