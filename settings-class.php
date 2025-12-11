@@ -335,7 +335,7 @@ final class Settings {
     // Check if submenu and same slug exists with same parent
     } else {
       $exists = array_filter( $sections, function ( $s ) use ( $section ) {
-        return $s['parent_slug'] === $section['parent_slug'] 
+        return isset( $s['parent_slug'] ) && $s['parent_slug'] === $section['parent_slug']
           && $s['menu_slug'] === $section['menu_slug']
           && $s['id'] === $section['id'];
       } );
