@@ -1,5 +1,5 @@
 <?php
-namespace Mtphr;
+namespace Mtphr\EmailCustomizer;
 
 /**
  * Create the class
@@ -57,9 +57,9 @@ final class Settings {
       add_action( 'init', array( self::$instance, 'initialize_settings' ), 1 );
       add_action( 'init', array( self::$instance, 'initialize_fields' ), 20 );
 
-      list( $path, $url ) = self::$instance->get_path( dirname( dirname( __FILE__ ) ) );
-      self::$instance->settings_dir = $path . 'mtphr-settings/';
-      self::$instance->settings_url = $url . 'mtphr-settings/';
+      list( $path, $url ) = self::$instance->get_path( dirname( __FILE__ ) );
+      self::$instance->settings_dir = $path;
+      self::$instance->settings_url = $url;
     }
     return self::$instance;
   }
@@ -1288,6 +1288,11 @@ final class Settings {
     // If it's an array, recurse no matter which sanitizer we use.
     if ( is_array( $value ) ) {
       return $this->loop_sanitize_value( $value, $sanitizer, $key, $option, $type );
+    }
+
+    // If it's an object, return as-is (can't sanitize objects with string sanitizers).
+    if ( is_object( $value ) ) {
+      return $value;
     }
 
     // Scalar: just apply.
