@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 1.1.0 [2025-12-12] =
+* Major reconfiguration of php files
+
 = 1.0.10 [2025-12-11] =
 * Added Ad field
 * Field container updates
