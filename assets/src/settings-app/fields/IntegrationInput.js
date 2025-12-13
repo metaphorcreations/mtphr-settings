@@ -27,6 +27,8 @@ const IntegrationInput = ({
   onSettingsChange,
   settingsOption,
   settingsId,
+  onSave,
+  isSaving,
 }) => {
   const { id, label, description, logo } = integration;
 
@@ -113,7 +115,7 @@ const IntegrationInput = ({
               __nextHasNoMarginBottom
               checked={isEnabled}
               onChange={(checked) => {
-                onChange(checked, id);
+                onChange(checked, integration);
               }}
             />
           </HStack>
@@ -129,6 +131,8 @@ const IntegrationInput = ({
           settingsOption={settingsOption}
           settingsId={settingsId}
           onCloseSettings={closeSettings}
+          onSave={onSave}
+          isSaving={isSaving}
         />
       )}
     </Card>

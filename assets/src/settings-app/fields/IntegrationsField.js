@@ -16,6 +16,9 @@ const IntegrationsField = ({
   settingsId,
   sections,
   onChange,
+  onSettingsChange,
+  onSave,
+  isSaving,
 }) => {
   const { class: className, disabled, help, label, id, integrations } = field;
   const queryVar = field.query_var || field.id;
@@ -29,6 +32,7 @@ const IntegrationsField = ({
 
   /**
    * Set the enabled value of the integration
+   * This handler is used for the toggle and triggers auto-save
    */
   const onChangeHandler = (checked, integration) => {
     if (!Array.isArray(value)) {
@@ -36,18 +40,31 @@ const IntegrationsField = ({
     }
 
     const updatedValues = checked
-      ? [...value, integration]
-      : value.filter((item) => item !== integration);
+      ? [...value, integration.id]
+      : value.filter((item) => item !== integration.id);
 
-    onChange({ id, value: updatedValues, settingsOption });
+    // Pass integration label and enabled state for custom notification
+    onChange({ 
+      id, 
+      value: updatedValues, 
+      settingsOption,
+      integrationLabel: integration.label,
+      isEnabled: checked
+    });
   };
 
   /**
    * Update the settings added to the integration
+   * This handler is used for settings changes within the modal (no auto-save)
    */
   const onSettingsChangeHandler = (data) => {
     const { id, value, settingsOption } = data;
-    onChange({ id, value, settingsOption });
+    // Use onSettingsChange (handleInputChange) for regular save, not auto-save
+    if (onSettingsChange) {
+      onSettingsChange({ id, value, settingsOption });
+    } else {
+      onChange({ id, value, settingsOption });
+    }
   };
 
   const { baseControlProps } = useBaseControlProps(field);
@@ -80,6 +97,8 @@ const IntegrationsField = ({
               settingsId={settingsId}
               onChange={onChangeHandler}
               onSettingsChange={onSettingsChangeHandler}
+              onSave={onSave}
+              isSaving={isSaving}
             />
           );
         })}

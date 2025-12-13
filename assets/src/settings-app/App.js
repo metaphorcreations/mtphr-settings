@@ -1,5 +1,5 @@
 import he from "he";
-import { __ } from "@wordpress/i18n";
+import { __, sprintf } from "@wordpress/i18n";
 import { useState, useEffect, useMemo } from "@wordpress/element";
 import {
   Button,
@@ -41,6 +41,73 @@ export default ({ settingsId, settingsTitle }) => {
 
   /** @type {[boolean, Function]} */
   const [isSaving, setIsSaving] = useState(false);
+
+  /**
+   * Creates a save handler for integration modals that saves only fields for a specific settingsOption
+   * @param {string} settingsOption - The settings option to save
+   * @returns {Function} Save handler function
+   */
+  const createIntegrationSaveHandler = (settingsOption) => {
+    return async () => {
+      setIsSaving(true);
+      try {
+        // Filter updatedValueKeys to only include keys for this settingsOption
+        const filteredValueKeys = {
+          [settingsOption]: updatedValueKeys[settingsOption] || [],
+        };
+
+        // Only proceed if there are changes to save
+        if (!filteredValueKeys[settingsOption] || filteredValueKeys[settingsOption].length === 0) {
+          dispatch("core/notices").createNotice(
+            "info",
+            __("No changes to save.", "mtphr-settings"),
+            { type: "snackbar" }
+          );
+          return;
+        }
+
+        const res = await fetch(`${settingVars.restUrl}settings`, {
+          method: "POST",
+          headers: {
+            "X-WP-Nonce": settingVars.nonce,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ valueKeys: filteredValueKeys, values }),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => null);
+          throw new Error(errorData?.message || `HTTP Error ${res.status}`);
+        }
+
+        const data = await res.json();
+        setValues(data);
+        
+        // Clear the updated keys for this settingsOption since they're now saved
+        setUpdatedValueKeys((prev) => {
+          const newKeys = { ...prev };
+          if (newKeys[settingsOption]) {
+            delete newKeys[settingsOption];
+          }
+          return newKeys;
+        });
+
+        dispatch("core/notices").createNotice(
+          "success",
+          __("Settings saved successfully!", "mtphr-settings"),
+          { type: "snackbar" }
+        );
+      } catch (error) {
+        dispatch("core/notices").createNotice(
+          "error",
+          `${__("Error saving settings.", "mtphr-settings")} ${error.message}`,
+          { type: "snackbar" }
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    };
+  };
 
   /** @type {[{ status: string, message: string } | null, Function]} */
   const [notice, setNotice] = useState(null);
@@ -209,6 +276,105 @@ export default ({ settingsId, settingsTitle }) => {
         ? prev[settingsOption]
         : [...(prev[settingsOption] || []), id],
     }));
+  };
+
+  /**
+   * Handles auto-save for integration toggles.
+   * Saves immediately when an integration is enabled/disabled.
+   *
+   * @param {Object} data
+   * @param {string} data.id - Field ID.
+   * @param {*} data.value - New field value.
+   * @param {string} data.settingsOption - Associated settings option key.
+   */
+  const handleAutoSave = async ({ id, value, settingsOption, integrationLabel, isEnabled }) => {
+    // Store the previous value for potential revert
+    const previousValue = values[settingsOption]?.[id];
+    
+    // Update local state immediately for UI responsiveness
+    setValues((prev) => ({
+      ...prev,
+      [settingsOption]: {
+        ...prev[settingsOption],
+        [id]: value,
+      },
+    }));
+
+    // Trigger save
+    setIsSaving(true);
+    try {
+      const currentUpdatedKeys = {
+        [settingsOption]: [id],
+      };
+      const currentValues = {
+        ...values,
+        [settingsOption]: {
+          ...values[settingsOption],
+          [id]: value,
+        },
+      };
+
+      const res = await fetch(`${settingVars.restUrl}settings`, {
+        method: "POST",
+        headers: {
+          "X-WP-Nonce": settingVars.nonce,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ valueKeys: currentUpdatedKeys, values: currentValues }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.message || `HTTP Error ${res.status}`);
+      }
+
+      const data = await res.json();
+      setValues(data);
+      
+      // Clear the updated keys for this field since it's now saved
+      setUpdatedValueKeys((prev) => {
+        const newKeys = { ...prev };
+        if (newKeys[settingsOption]) {
+          newKeys[settingsOption] = newKeys[settingsOption].filter(key => key !== id);
+          if (newKeys[settingsOption].length === 0) {
+            delete newKeys[settingsOption];
+          }
+        }
+        return newKeys;
+      });
+
+      // Show custom message with integration name
+      const message = integrationLabel
+        ? sprintf(
+            __("%s %s", "mtphr-settings"),
+            integrationLabel,
+            isEnabled ? __("enabled", "mtphr-settings") : __("disabled", "mtphr-settings")
+          )
+        : __("Integration settings saved!", "mtphr-settings");
+
+      dispatch("core/notices").createNotice(
+        "success",
+        message,
+        { type: "snackbar" }
+      );
+    } catch (error) {
+      // Revert the local state change on error
+      setValues((prev) => ({
+        ...prev,
+        [settingsOption]: {
+          ...prev[settingsOption],
+          [id]: previousValue,
+        },
+      }));
+      
+      dispatch("core/notices").createNotice(
+        "error",
+        `${__("Error saving integration settings.", "mtphr-settings")} ${error.message}`,
+        { type: "snackbar" }
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   /**
@@ -542,11 +708,14 @@ export default ({ settingsId, settingsTitle }) => {
                         key={`${option}-${id || i}`}
                         field={field}
                         value={values[option][id] || ""}
-                        onChange={handleInputChange}
+                        onChange={field.type === "integrations" ? handleAutoSave : handleInputChange}
+                        onSettingsChange={field.type === "integrations" ? handleInputChange : undefined}
                         values={values[option]}
                         settingsOption={option}
                         settingsId={settingsId}
                         sections={secondarySections}
+                        onSave={field.type === "integrations" ? createIntegrationSaveHandler(option) : undefined}
+                        isSaving={isSaving}
                       />
                     );
                   })}

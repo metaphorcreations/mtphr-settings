@@ -17,6 +17,8 @@ const IntegrationModal = ({
   onCloseSettings,
   settingsOption,
   settingsId,
+  onSave,
+  isSaving,
 }) => {
   const { label } = integration;
   const Field = getComponent("field");
@@ -25,6 +27,19 @@ const IntegrationModal = ({
     console.error("Field component not registered");
     return null;
   }
+
+  /**
+   * Handle save action
+   * @param {boolean} closeAfterSave - Whether to close the modal after saving
+   */
+  const handleSave = async (closeAfterSave = false) => {
+    if (onSave) {
+      await onSave();
+      if (closeAfterSave) {
+        onCloseSettings();
+      }
+    }
+  };
 
   return (
     <Modal
@@ -61,6 +76,7 @@ const IntegrationModal = ({
       </div>
       <HStack
         alignment="right"
+        spacing={2}
         style={{
           position: "absolute",
           bottom: "0px",
@@ -70,9 +86,27 @@ const IntegrationModal = ({
           background: "#FFF",
         }}
       >
-        <Button variant="secondary" onClick={onCloseSettings}>
+        <Button variant="secondary" onClick={onCloseSettings} disabled={isSaving}>
           {__("Close", "mtphr-settings")}
         </Button>
+        {onSave && (
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => handleSave(false)}
+              disabled={isSaving}
+            >
+              {__("Save", "mtphr-settings")}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => handleSave(true)}
+              disabled={isSaving}
+            >
+              {__("Save & Close", "mtphr-settings")}
+            </Button>
+          </>
+        )}
       </HStack>
     </Modal>
   );

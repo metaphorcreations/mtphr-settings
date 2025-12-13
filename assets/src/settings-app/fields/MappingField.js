@@ -24,12 +24,19 @@ const MappingField = ({ field, value = {}, settingsOption, onChange }) => {
 
   // Initialize state to track mapped values
   const [mappedValues, setMappedValues] = useState(() => {
-    return map_source.map((item) => ({
-      id: item.id,
-      label: item.label ? he.decode(item.label || item.id) : (item.label || item.id),
-      help: item.help ? he.decode(item.help) : item.help,
-      value: value[item.id] || "",
-    }));
+    return map_source.map((item) => {
+      // Ensure value is always a scalar string, not an array
+      let fieldValue = value[item.id] || "";
+      if (Array.isArray(fieldValue)) {
+        fieldValue = fieldValue[0] || "";
+      }
+      return {
+        id: item.id,
+        label: item.label ? he.decode(item.label || item.id) : (item.label || item.id),
+        help: item.help ? he.decode(item.help) : item.help,
+        value: String(fieldValue),
+      };
+    });
   });
 
   const handleSelectChange = (selectedValue, mappedId) => {

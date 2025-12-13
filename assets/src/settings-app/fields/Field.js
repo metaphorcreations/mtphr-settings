@@ -15,10 +15,13 @@ const Field = ({
   field,
   value,
   onChange,
+  onSettingsChange,
   values,
   settingsOption,
   settingsId,
   sections,
+  onSave,
+  isSaving,
 }) => {
   // Apply default container settings for ad fields if not explicitly set
   const containerDefaults = field.type === 'ad' 
@@ -78,10 +81,13 @@ const Field = ({
           field={field}
           value={value}
           onChange={onChange}
+          onSettingsChange={onSettingsChange}
           values={values}
           settingsOption={settingsOption}
           settingsId={settingsId}
           sections={sections}
+          onSave={onSave}
+          isSaving={isSaving}
         />
       </CardBody>
     </Card>
