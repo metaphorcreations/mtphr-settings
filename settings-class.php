@@ -9,7 +9,7 @@ final class Settings {
   private static $instance;
 
   private $version = '1.0.10';
-  private $id = 'mtphr';
+  private $id = '';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
   private $settings_url = '';
@@ -40,10 +40,22 @@ final class Settings {
   public static function instance() {
     if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Settings ) ) {	
 			self::$instance = new Settings;
+      
+      // Initialize the ID based on namespace
+      if ( empty( self::$instance->id ) ) {
+        self::$instance->id = self::$instance->get_namespace_identifier();
+      }
+      
+      // Register WordPress hooks for admin functionality
       add_action( 'admin_menu', array( self::$instance, 'create_admin_pages' ) );
       add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_scripts' ) );
       add_action( 'rest_api_init', array( self::$instance, 'register_routes' ) );
       add_action( 'admin_notices', array( self::$instance, 'admin_notices' ) );
+
+      // Register initialization hooks - fires namespace-specific action hooks
+      add_action( 'rest_api_init', array( self::$instance, 'initialize_settings' ), 1 );
+      add_action( 'init', array( self::$instance, 'initialize_settings' ), 1 );
+      add_action( 'init', array( self::$instance, 'initialize_fields' ), 20 );
 
       list( $path, $url ) = self::$instance->get_path( dirname( dirname( __FILE__ ) ) );
       self::$instance->settings_dir = $path . 'mtphr-settings/';
@@ -131,6 +143,21 @@ final class Settings {
    */
   public function get_fields_ready() {
     return self::$instance->fields_ready;
+  }
+
+  /**
+   * Get namespace identifier from the class namespace
+   */
+  private function get_namespace_identifier() {
+    $reflection = new \ReflectionClass( $this );
+    $namespace = $reflection->getNamespaceName();
+    
+    // Convert namespace to identifier by removing backslashes
+    // e.g., "Mtphr\PostDuplicator" -> "MtphrPostDuplicator"
+    $identifier = str_replace( '\\', '', $namespace );
+    
+    // Fallback to 'mtphr' if namespace is empty (shouldn't happen, but safety check)
+    return ! empty( $identifier ) ? $identifier : 'mtphr';
   }
 
   /**
@@ -993,7 +1020,7 @@ final class Settings {
     );
 
     // Add a hook for other scripts to register custom fields
-    do_action( 'mtphrSettings/enqueue_fields', self::$instance->get_id() . 'Registry' );
+    do_action( self::$instance->get_id() . '/enqueue_fields', self::$instance->get_id() . 'Registry' );
 
     $asset_file = include( self::$instance->settings_dir . 'assets/build/mtphrSettings.asset.php' );
     wp_enqueue_style(
@@ -1422,5 +1449,107 @@ final class Settings {
         echo '</div>';
       }
     }
+  }
+
+  /**
+   * Initialize settings - fires the init_settings action hook
+   */
+  public function initialize_settings() {
+    if ( ! $this->settings_ready ) {
+      do_action( $this->get_id() . '/init_settings' );
+      $this->settings_ready = true;
+    }
+  }
+
+  /**
+   * Initialize fields - fires the init_fields action hook
+   */
+  public function initialize_fields() {
+    if ( ! $this->fields_ready ) {
+      do_action( $this->get_id() . '/init_fields' );
+      $this->fields_ready = true;
+    }
+  }
+
+  /*--------------------------------------------------------------------------
+   * Static API Methods
+   * These provide a cleaner interface: Settings::add_admin_page($data)
+   *------------------------------------------------------------------------*/
+
+  /**
+   * Static: Add an admin page
+   */
+  public static function admin_page( $data ) {
+    return self::instance()->add_admin_page( $data );
+  }
+
+  /**
+   * Static: Add a section
+   */
+  public static function section( $data ) {
+    return self::instance()->add_section( $data );
+  }
+
+  /**
+   * Static: Add fields
+   */
+  public static function fields( $data ) {
+    return self::instance()->add_fields( $data );
+  }
+
+  /**
+   * Static: Add sidebar
+   */
+  public static function sidebar( $data ) {
+    return self::instance()->add_sidebar( $data );
+  }
+
+  /**
+   * Static: Add default values
+   */
+  public static function default_values( $option, $values = [] ) {
+    return self::instance()->add_default_values( $option, $values );
+  }
+
+  /**
+   * Static: Add sanitize settings
+   */
+  public static function sanitize_settings( $option, $values = [] ) {
+    return self::instance()->add_sanitize_settings( $option, $values );
+  }
+
+  /**
+   * Static: Add encryption settings
+   */
+  public static function encryption_settings( $option, $values = [] ) {
+    return self::instance()->add_encryption_settings( $option, $values );
+  }
+
+  /**
+   * Static: Get an option value
+   */
+  public static function get_value( $option, $key = false ) {
+    $values = self::instance()->get_option_values( $option );
+    if ( $key ) {
+      if ( isset( $values[$key] ) ) {
+        return $values[$key];
+      }
+      return null;
+    }
+    return $values;
+  }
+
+  /**
+   * Static: Set an option value
+   */
+  public static function set_value( $option, $key, $value = false ) {
+    if ( is_array( $key ) ) {
+      $updated_values = $key;
+    } else {
+      $updated_values = [
+        $key => $value,
+      ];
+    }
+    return self::instance()->update_values( $option, $updated_values );
   }
 }
