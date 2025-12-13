@@ -1,5 +1,5 @@
 <?php
-namespace Mtphr\EmailCustomizer;
+namespace Mtphr;
 
 /**
  * Create the class
