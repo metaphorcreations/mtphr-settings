@@ -21,36 +21,9 @@ import { BaseControl, useBaseControlProps } from "@wordpress/components";
  * @param {string} props.settingsId - Settings instance identifier (fallback if trackingRef not provided)
  * @returns {JSX.Element}
  */
-const AdInput = ({ field, settingsId }) => {
-  const { image, link, id, trackingRef, alt, class: className } = field;
+const AdInput = ({ field }) => {
+  const { image, link, alt, class: className } = field;
 
-  /**
-   * Builds a tracked URL by appending tracking parameters
-   * Preserves existing query parameters if present
-   * 
-   * @param {string} baseUrl - Original URL
-   * @param {string} refValue - Reference identifier (from field.trackingRef or fallback to settingsId)
-   * @param {string} adId - Ad identifier
-   * @returns {string} URL with tracking parameters
-   */
-  const buildTrackedUrl = (baseUrl, refValue, adId) => {
-    try {
-      const url = new URL(baseUrl);
-      url.searchParams.append('ref', refValue);
-      url.searchParams.append('ad_id', adId);
-      return url.toString();
-    } catch (error) {
-      // If URL parsing fails, return original URL
-      console.error('AdInput: Invalid URL provided:', baseUrl);
-      return baseUrl;
-    }
-  };
-
-  // Use field.trackingRef if provided, otherwise fallback to settingsId
-  const refValue = trackingRef || settingsId;
-
-  // Build the tracked URL
-  const trackedUrl = buildTrackedUrl(link, refValue, id);
 
   // Determine alt text: use field.alt, or fallback to decoded label, or "Advertisement"
   const imageAlt = alt 
@@ -67,7 +40,7 @@ const AdInput = ({ field, settingsId }) => {
     <BaseControl {...baseControlProps} __nextHasNoMarginBottom>
       <div className={className} style={{ display: 'block', lineHeight: 0 }}>
         <a 
-          href={trackedUrl} 
+          href={link} 
           target="_blank" 
           rel="noopener noreferrer"
           style={{ display: 'inline-block' }}
