@@ -2,6 +2,9 @@
 
 = 1.1.0 [2025-12-12] =
 * Major reconfiguration of php files
+* Added Integrations field and inputs
+* Added Links inputs
+* Field.js updates
 
 = 1.0.10 [2025-12-11] =
 * Added Ad field

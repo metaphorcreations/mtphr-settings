@@ -12,6 +12,7 @@ import Field from "../fields/Field";
 import GroupField from "../fields/GroupField";
 import HeadingField from "../fields/HeadingField";
 import IntegrationInput from "../fields/IntegrationInput";
+import LinksInput from "../fields/LinksInput";
 import IntegrationModal from "../fields/IntegrationModal";
 import IntegrationsField from "../fields/IntegrationsField";
 import MappingField from "../fields/MappingField";
@@ -36,6 +37,7 @@ if (registerComponent) {
   registerComponent("group", GroupField);
   registerComponent("heading", HeadingField);
   registerComponent("integration_input", IntegrationInput);
+  registerComponent("links", LinksInput);
   registerComponent("integration_modal", IntegrationModal);
   registerComponent("integrations", IntegrationsField);
   registerComponent("mapping", MappingField);
