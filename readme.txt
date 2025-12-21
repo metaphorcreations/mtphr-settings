@@ -1,7 +1,10 @@
 == Changelog ==
 
-= 1.1.1 [2025-12-21] =
+= 1.1.2 [2025-12-21] =
 * Added Selection input
+
+= 1.1.1 [2025-12-14] =
+* Added Ad field input
 
 = 1.1.0 [2025-12-12] =
 * Major reconfiguration of php files
