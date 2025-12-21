@@ -19,6 +19,7 @@ import MappingField from "../fields/MappingField";
 import NumberInput from "../fields/NumberInput";
 import RadioButtonsInput from "../fields/RadioButtonsInput";
 import SelectInput from "../fields/SelectInput";
+import SelectionInput from "../fields/SelectionInput";
 import SpacerField from "../fields/SpacerField";
 import TabsField from "../fields/TabsField";
 import TextAreaInput from "../fields/TextAreaInput";
@@ -44,6 +45,7 @@ if (registerComponent) {
   registerComponent("number", NumberInput);
   registerComponent("radio_buttons", RadioButtonsInput);
   registerComponent("select", SelectInput);
+  registerComponent("selection", SelectionInput);
   registerComponent("spacer", SpacerField);
   registerComponent("html", CustomHTMLInput);
   registerComponent("tabs", TabsField);
