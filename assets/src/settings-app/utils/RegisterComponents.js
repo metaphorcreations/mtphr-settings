@@ -7,6 +7,7 @@ import CheckboxInput from "../fields/CheckboxInput";
 import CheckboxesInput from "../fields/CheckboxesInput";
 import ColorInput from "../fields/ColorInput";
 import CustomHTMLInput from "../fields/CustomHTMLInput";
+import DateInput from "../fields/DateInput";
 import EddLicenseInput from "../fields/EddLicenseInput";
 import Field from "../fields/Field";
 import GroupField from "../fields/GroupField";
@@ -24,6 +25,7 @@ import SpacerField from "../fields/SpacerField";
 import TabsField from "../fields/TabsField";
 import TextAreaInput from "../fields/TextAreaInput";
 import TextInput from "../fields/TextInput";
+import ToggleInput from "../fields/ToggleInput";
 
 // Register built-in components
 if (registerComponent) {
@@ -33,6 +35,7 @@ if (registerComponent) {
   registerComponent("color", ColorInput);
   registerComponent("checkbox", CheckboxInput);
   registerComponent("checkboxes", CheckboxesInput);
+  registerComponent("date", DateInput);
   registerComponent("edd_license", EddLicenseInput);
   registerComponent("field", Field);
   registerComponent("group", GroupField);
@@ -51,4 +54,5 @@ if (registerComponent) {
   registerComponent("tabs", TabsField);
   registerComponent("text", TextInput);
   registerComponent("textarea", TextAreaInput);
+  registerComponent("toggle", ToggleInput);
 }
