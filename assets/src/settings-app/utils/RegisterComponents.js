@@ -18,6 +18,7 @@ import IntegrationModal from "../fields/IntegrationModal";
 import IntegrationsField from "../fields/IntegrationsField";
 import MappingField from "../fields/MappingField";
 import NumberInput from "../fields/NumberInput";
+import OptionsMatrixInput from "../fields/OptionsMatrixInput";
 import RadioButtonsInput from "../fields/RadioButtonsInput";
 import SelectInput from "../fields/SelectInput";
 import SelectionInput from "../fields/SelectionInput";
@@ -46,6 +47,7 @@ if (registerComponent) {
   registerComponent("integrations", IntegrationsField);
   registerComponent("mapping", MappingField);
   registerComponent("number", NumberInput);
+  registerComponent("options_matrix", OptionsMatrixInput);
   registerComponent("radio_buttons", RadioButtonsInput);
   registerComponent("select", SelectInput);
   registerComponent("selection", SelectionInput);

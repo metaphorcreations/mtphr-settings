@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 1.1.3 [2025-12-31] =
+* Added Date input
+* Added Toggle input
+* Added Options Matri
+
 = 1.1.2 [2025-12-21] =
 * Added Selection input
 

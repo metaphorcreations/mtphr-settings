@@ -1,0 +1,109 @@
+name: Sync Wiki Documentation
+
+# Workflow runs only when wiki files change or when manually triggered
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'wiki/**'
+  workflow_dispatch:
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync wiki files
+        run: |
+          # Copy all files from wiki/ directory to GitHub wiki
+          if [ -d "wiki" ]; then
+            echo "Copying all files from wiki/ directory to GitHub wiki"
+            cp -r wiki/* wiki-repo/ 2>/dev/null || true
+            echo "Files synced:"
+            ls -la wiki-repo/ || echo "No files found"
+          else
+            echo "Warning: wiki/ directory not found"
+          fi
+
+      - name: Create Home page if it doesn't exist
+        run: |
+          # Only create default Home.md if custom one wasn't copied from wiki/ directory
+          if [ ! -f "wiki-repo/Home.md" ]; then
+            echo "Creating default Home.md"
+            cat > wiki-repo/Home.md << 'EOF'
+          # Mtphr Settings Documentation
+
+          Welcome to the Mtphr Settings library documentation. This is a powerful WordPress settings framework for creating beautiful, modern admin interfaces.
+
+          ## Getting Started
+
+          - [Getting Started](Getting-Started) - Learn how to integrate Mtphr Settings into your plugin or theme
+          - [Creating Custom Fields](Creating-Custom-Fields) - Create custom field types for your projects
+          - [Creating New Field Types](Creating-New-Field-Types) - Add new field types to the core library
+
+          ## Field Types
+
+          - [Text Input](Field-Types-Text-Input)
+          - [Textarea](Field-Types-Textarea)
+          - [Number Input](Field-Types-Number-Input)
+          - [Select](Field-Types-Select)
+          - [Checkbox](Field-Types-Checkbox)
+          - [Checkboxes](Field-Types-Checkboxes)
+          - [Radio Buttons](Field-Types-Radio-Buttons)
+          - [Toggle](Field-Types-Toggle)
+          - [Color Picker](Field-Types-Color-Picker)
+          - [Date Input](Field-Types-Date-Input)
+          - [Button](Field-Types-Button)
+          - [Buttons Field](Field-Types-Buttons-Field)
+          - [Links Input](Field-Types-Links-Input)
+          - [Custom HTML](Field-Types-Custom-HTML)
+          - [Group Field](Field-Types-Group-Field)
+          - [Tabs Field](Field-Types-Tabs-Field)
+          - [Heading Field](Field-Types-Heading-Field)
+          - [Spacer Field](Field-Types-Spacer-Field)
+          - [Selection Input](Field-Types-Selection-Input)
+          - [Options Matrix](Field-Types-Options-Matrix)
+          - [Mapping Field](Field-Types-Mapping-Field)
+          - [Integrations Field](Field-Types-Integrations-Field)
+          - [EDD License Input](Field-Types-EDD-License-Input)
+          - [Ad Field](Field-Types-Ad-Field)
+
+          ## Quick Links
+
+          - [GitHub Repository](https://github.com/${{ github.repository }})
+          - [Issues](https://github.com/${{ github.repository }}/issues)
+          EOF
+          else
+            echo "Custom Home.md found in wiki/ directory - using that instead"
+          fi
+
+      - name: Commit and push wiki changes
+        run: |
+          cd wiki-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "Auto-sync wiki documentation from repository"
+            git push
+          else
+            echo "No changes to commit"
+          fi
