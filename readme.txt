@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 1.1.4 [2025-01-02] =
+* Sanitization bug fix
+
 = 1.1.3 [2025-12-31] =
 * Added Date input
 * Added Toggle input
