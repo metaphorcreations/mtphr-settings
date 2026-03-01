@@ -1,6 +1,9 @@
 == Changelog ==
 
-= 1.1.4 [2025-01-02] =
+= 1.1.5 [2026-02-28] =
+* Added Notification field with support for success, error, warning, and info types
+
+= 1.1.4 [2026-01-02] =
 * Sanitization bug fix
 
 = 1.1.3 [2025-12-31] =

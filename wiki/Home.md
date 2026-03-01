@@ -36,6 +36,8 @@ Welcome to the Mtphr Settings library documentation. This is a powerful WordPres
 - [EDD License Input](Field-Types-EDD-License-Input) - Easy Digital Downloads license field
 - [Ad Field](Field-Types-Ad-Field) - Advertisement display field
 
+- [Notification Field](Field-Types-Notification-Field) - Color-coded notification display field
+
 ### Layout Fields
 - [Group Field](Field-Types-Group-Field) - Group related fields together
 - [Tabs Field](Field-Types-Tabs-Field) - Tabbed field container
