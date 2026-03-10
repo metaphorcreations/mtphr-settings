@@ -8,6 +8,7 @@ import {
   Notice,
   __experimentalHeading as Heading,
 } from "@wordpress/components";
+import CloneWrapper from "./CloneWrapper";
 
 const { getComponent } = window.mtphrSettingsRegistry || {};
 
@@ -78,6 +79,17 @@ const Field = ({
     border,
   } = container;
   const { inline } = field;
+
+  if (field.clone) {
+    return (
+      <CloneWrapper
+        field={field}
+        value={value}
+        onChange={onChange}
+        settingsOption={settingsOption}
+      />
+    );
+  }
 
   const Component = getComponent(field.type);
 
@@ -153,7 +165,7 @@ const Field = ({
       isBorderless={isBorderless}
       style={cardStyle}
     >
-      {field.type === "group" && field.label && (
+      {(field.type === "group" || field.type === "repeater") && field.label && (
         <CardHeader className={`$mtphrSettings__field__heading`}>
           <Heading level={4}>{he.decode(field.label)}</Heading>
         </CardHeader>

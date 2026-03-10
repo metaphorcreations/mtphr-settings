@@ -1,5 +1,5 @@
 <?php
-namespace Mtphr;
+namespace Ditty\ProX;
 
 /**
  * Create the class
@@ -314,7 +314,10 @@ final class Settings {
   }
 
   /**
-   * Add an option key
+   * Add a section (tab) to a settings page.
+   *
+   * @param array $section Section config. Keys: id, slug, menu_slug, option, label, order, type, show, hide.
+   *                       Optional: show_tab_when_single (bool) – when true, show the tab bar even if this is the only primary section.
    */
   public function add_section( $section ) {
     $sections = self::$instance->get_sections();
@@ -395,18 +398,11 @@ final class Settings {
     }
     if ( $page ) {
       $menu_slug = $page['menu_slug'];
-      $parent_slug = isset( $page['parent_slug'] ) ? $page['parent_slug'] : false;     
       $page_sections = [];
       if ( is_array( $sections ) && ! empty( $sections ) ) {
         foreach ( $sections as $section ) {
-          if ( $menu_slug == $section['menu_slug'] ) {
-            if ( $parent_slug ) {
-              if ( isset( $section['parent_slug'] ) &&  $parent_slug = $section['parent_slug'] ) {
-                $page_sections[] = $section;
-              }
-            } else {
-              $page_sections[] = $section;
-            }
+          if ( $menu_slug === $section['menu_slug'] ) {
+            $page_sections[] = $section;
           }
         }
       }
@@ -1036,19 +1032,24 @@ final class Settings {
       true
     ); 
 
+    $show_reset_button = ! empty( $admin_page['show_reset_button'] );
+    $default_values = self::$instance->get_default_values( $options );
+
     wp_add_inline_script( self::$instance->get_id(), self::$instance->get_id() . 'Vars = ' . wp_json_encode( array(
-      'siteUrl'        => site_url(),
-      'restUrl'        => esc_url_raw( rest_url( self::$instance->get_id() . '\/v1/' ) ),
-      'values'         => $values,
-      'fields'         => $settings,
-      'field_sections' => $sections,
-      'sidebar_items'  => self::$instance->get_sidebar_items(),
-      'sidebar_width'  => self::$instance->get_sidebar_width(),
-      'main_max_width' => self::$instance->get_main_content_max_width(),
-      'header_icon'    => $header_icon,
+      'siteUrl'            => site_url(),
+      'restUrl'            => esc_url_raw( rest_url( self::$instance->get_id() . '\/v1/' ) ),
+      'values'             => $values,
+      'default_values'     => $default_values,
+      'fields'             => $settings,
+      'field_sections'     => $sections,
+      'sidebar_items'      => self::$instance->get_sidebar_items(),
+      'sidebar_width'      => self::$instance->get_sidebar_width(),
+      'main_max_width'     => self::$instance->get_main_content_max_width(),
+      'header_icon'        => $header_icon,
       'header_description' => $header_description,
-      'header_version' => $header_version,
-      'nonce'          => wp_create_nonce( 'wp_rest' )
+      'header_version'     => $header_version,
+      'show_reset_button'  => $show_reset_button,
+      'nonce'              => wp_create_nonce( 'wp_rest' )
     ) ), 'before' ) . ';';
   }
 
@@ -1169,14 +1170,32 @@ final class Settings {
         $has_child_fields = is_array( $current_field_type ) && isset( $current_field_type['__type'] );
 
         if ( is_array( $value ) && $has_child_fields ) {
-            // Recursively update only if this key actually has child fields
-            $existing_values[$key] = $this->recursive_update_values(
-                isset( $existing_values[$key] ) ? $existing_values[$key] : [],
-                $value,
-                isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
-                $current_field_type, // Pass only the relevant section of type_settings
-                $option
-            );
+            if ( isset( $current_field_type['__type'] ) && 'repeater' === $current_field_type['__type'] ) {
+                // Repeater: value is a numerically indexed array of row objects.
+                // Sanitize each row's fields using the repeater's sub-field type map.
+                $sanitized_rows = [];
+                foreach ( $value as $row ) {
+                    if ( is_array( $row ) ) {
+                        $sanitized_rows[] = $this->recursive_update_values(
+                            [],
+                            $row,
+                            isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
+                            $current_field_type,
+                            $option
+                        );
+                    }
+                }
+                $existing_values[$key] = $sanitized_rows;
+            } else {
+                // Group / other nested: recursively update keyed child fields
+                $existing_values[$key] = $this->recursive_update_values(
+                    isset( $existing_values[$key] ) ? $existing_values[$key] : [],
+                    $value,
+                    isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
+                    $current_field_type,
+                    $option
+                );
+            }
         } else {
             // Get the sanitizer for this specific key, or fallback to default
             $sanitizer = isset( $sanitize_settings[$key] ) 
@@ -1212,14 +1231,31 @@ final class Settings {
         $has_child_fields = is_array( $current_field_type ) && isset( $current_field_type['__type'] );
 
         if ( is_array( $value ) && $has_child_fields ) {
-          // Recursively sanitize nested arrays using the same key structure
-          $sanitized_values[$key] = $this->recursive_sanitize_values(
-            $value, 
-            isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
-            $option,
-            $current_field_type,
-            $type
-          );
+          if ( isset( $current_field_type['__type'] ) && 'repeater' === $current_field_type['__type'] ) {
+            // Repeater: value is a numerically indexed array of row objects.
+            $sanitized_rows = [];
+            foreach ( $value as $row ) {
+              if ( is_array( $row ) ) {
+                $sanitized_rows[] = $this->recursive_sanitize_values(
+                  $row,
+                  isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
+                  $option,
+                  $current_field_type,
+                  $type
+                );
+              }
+            }
+            $sanitized_values[$key] = $sanitized_rows;
+          } else {
+            // Recursively sanitize nested arrays using the same key structure
+            $sanitized_values[$key] = $this->recursive_sanitize_values(
+              $value, 
+              isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
+              $option,
+              $current_field_type,
+              $type
+            );
+          }
         } else {
           
           // Retrieve the appropriate sanitizer or fallback to the default

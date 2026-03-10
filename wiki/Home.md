@@ -26,6 +26,7 @@ Welcome to the Mtphr Settings library documentation. This is a powerful WordPres
 - [Options Matrix](Field-Types-Options-Matrix) - Matrix-style options field
 
 ### Special Fields
+- [API Connections](Field-Types-API-Connections) - Multi-account OAuth connection management field
 - [Color Picker](Field-Types-Color-Picker) - Color selection field
 - [Button](Field-Types-Button) - Action button field
 - [Buttons Field](Field-Types-Buttons-Field) - Multiple button group

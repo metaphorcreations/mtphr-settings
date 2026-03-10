@@ -136,6 +136,151 @@
     }
   }
 
+  // API Connections field styles
+  &__api-connections {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+
+    &-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #f9f9f9;
+      border-bottom: 1px solid #ddd;
+    }
+
+    &-provider-icon {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      width: 24px;
+      height: 24px;
+
+      svg {
+        display: block;
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+    }
+
+    &-provider-name {
+      color: #1d2327;
+    }
+
+    &-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-account {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.15s ease;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: #f9f9f9;
+      }
+    }
+
+    &-avatar {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    &-avatar-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &-avatar-initial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    &-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &-primary {
+      color: #1d2327;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    &-secondary {
+      color: #646970;
+      line-height: 1.4;
+    }
+
+    &-actions {
+      flex-shrink: 0;
+    }
+
+    &-empty {
+      padding: 20px 16px;
+      color: #646970;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    &-footer {
+      padding: 12px 16px;
+      border-top: 1px solid #ddd;
+      background: #f9f9f9;
+    }
+  }
+
+  // Repeater field styles
+  &__repeater {
+    &-row {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+    }
+
+    &-drag-handle {
+      cursor: grab;
+      color: #949494;
+      padding: 0 !important;
+      min-width: 24px !important;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    &-row-number {
+      font-size: 11px;
+      font-weight: 600;
+      color: #949494;
+      text-transform: uppercase;
+    }
+  }
+
   // Hide WordPress admin notices that appear inside the React app
   .notice {
     display: none !important;
@@ -252,6 +397,19 @@
       }
     }
   }
+}
+
+.mtphr-time-input {
+  .components-input-control__container {
+    max-width: var(--mtphr-time-max-width, 150px);
+  }
+}
+
+.mtphr-settings-toggles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 24px;
+  margin-top: 8px;
 }
 
 // .mtphrSettingsAppsettings__form {

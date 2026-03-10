@@ -1,6 +1,7 @@
 const { registerComponent } = window.mtphrSettingsRegistry || {};
 
 import AdInput from "../fields/AdInput";
+import ApiConnectionsField from "../fields/ApiConnectionsField";
 import ButtonInput from "../fields/ButtonInput";
 import ButtonsField from "../fields/ButtonsField";
 import CheckboxInput from "../fields/CheckboxInput";
@@ -20,6 +21,7 @@ import MappingField from "../fields/MappingField";
 import NotificationField from "../fields/NotificationField";
 import NumberInput from "../fields/NumberInput";
 import OptionsMatrixInput from "../fields/OptionsMatrixInput";
+import RepeaterField from "../fields/RepeaterField";
 import RadioButtonsInput from "../fields/RadioButtonsInput";
 import SelectInput from "../fields/SelectInput";
 import SelectionInput from "../fields/SelectionInput";
@@ -27,11 +29,14 @@ import SpacerField from "../fields/SpacerField";
 import TabsField from "../fields/TabsField";
 import TextAreaInput from "../fields/TextAreaInput";
 import TextInput from "../fields/TextInput";
+import TimeInput from "../fields/TimeInput";
 import ToggleInput from "../fields/ToggleInput";
+import TogglesInput from "../fields/TogglesInput";
 
 // Register built-in components
 if (registerComponent) {
   registerComponent("ad", AdInput);
+  registerComponent("api_connections", ApiConnectionsField);
   registerComponent("button", ButtonInput);
   registerComponent("buttons", ButtonsField);
   registerComponent("color", ColorInput);
@@ -51,6 +56,7 @@ if (registerComponent) {
   registerComponent("number", NumberInput);
   registerComponent("options_matrix", OptionsMatrixInput);
   registerComponent("radio_buttons", RadioButtonsInput);
+  registerComponent("repeater", RepeaterField);
   registerComponent("select", SelectInput);
   registerComponent("selection", SelectionInput);
   registerComponent("spacer", SpacerField);
@@ -58,5 +64,7 @@ if (registerComponent) {
   registerComponent("tabs", TabsField);
   registerComponent("text", TextInput);
   registerComponent("textarea", TextAreaInput);
+  registerComponent("time", TimeInput);
   registerComponent("toggle", ToggleInput);
+  registerComponent("toggles", TogglesInput);
 }

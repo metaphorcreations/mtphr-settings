@@ -115,12 +115,14 @@ export default ({ settingsId, settingsTitle }) => {
   const {
     fields,
     field_sections: fieldSections,
+    default_values: defaultValues = {},
     sidebar_items: sidebarItems = [],
     sidebar_width: sidebarWidth = '320px',
     main_max_width: mainMaxWidth = '1000px',
     header_icon: headerIcon = '',
     header_description: headerDescription = '',
-    header_version: headerVersion = ''
+    header_version: headerVersion = '',
+    show_reset_button: showResetButton = false,
   } = settingVars;
 
   /** @type {{ Fill: React.ComponentType, Slot: React.ComponentType }} */
@@ -168,6 +170,7 @@ export default ({ settingsId, settingsTitle }) => {
           show: sectionData.show ?? null,
           hide: sectionData.hide ?? null,
           type: sectionData.type ?? "tab",
+          show_tab_when_single: sectionData.show_tab_when_single ?? false,
           fields: [],
         };
         acc.push(section);
@@ -424,6 +427,25 @@ export default ({ settingsId, settingsTitle }) => {
   };
 
   /**
+   * Resets all field values for the current page back to their defaults.
+   */
+  const handleReset = () => {
+    const resetValues = {};
+    Object.keys(values).forEach((optionKey) => {
+      resetValues[optionKey] = defaultValues[optionKey] || {};
+    });
+    setValues(resetValues);
+
+    const allKeys = {};
+    Object.keys(values).forEach((optionKey) => {
+      allKeys[optionKey] = Object.keys(values[optionKey] || {});
+    });
+    setUpdatedValueKeys(allKeys);
+
+    window.dispatchEvent(new CustomEvent("mtphr-settings-reset"));
+  };
+
+  /**
    * Renders a local dismissible Notice inside a SlotFill container.
    *
    * @returns {JSX.Element|null}
@@ -518,11 +540,11 @@ export default ({ settingsId, settingsTitle }) => {
           idContexts.get(item.id).push(context || "root");
         }
 
-        // Recursively check nested group fields
-        if (item.type === "group" && Array.isArray(item.fields)) {
+        // Recursively check nested group and repeater fields
+        if ((item.type === "group" || item.type === "repeater") && Array.isArray(item.fields)) {
           const groupContext = context 
-            ? `${context} > group '${item.id || `#${index}`}'`
-            : `group '${item.id || `#${index}`}'`;
+            ? `${context} > ${item.type} '${item.id || `#${index}`}'`
+            : `${item.type} '${item.id || `#${index}`}'`;
           collectIds(item.fields, groupContext);
         }
 
@@ -681,51 +703,76 @@ export default ({ settingsId, settingsTitle }) => {
               </p>
             </Notice>
           )}
-          <TabPanel
-            className="mtphrSettings__tabs"
-            activeClass="is-active"
-            tabs={tabs}
-            initialTabName={activeTab}
-            onSelect={setActiveTab}
-          >
-            {(tab) => {
-              const currentSection = primarySections.find(
-                (section) => section.id === tab.id
-              );
-              if (!currentSection) return null;
+          {primarySections.length <= 1 && !primarySections.some((s) => s.show_tab_when_single) ? (
+            <div className="mtphrSettings__section">
+              {primarySections[0]?.fields.map((field, i) => {
+                const { option, id } = field;
+                if (!shouldRenderField(field, values[option])) return null;
 
-              return (
-                <div
-                  className="mtphrSettings__section"
-                  key={`tab-panel-${tab.id}`}
-                >
-                  {currentSection.fields.map((field, i) => {
-                    const { option, id } = field;
-                    if (!shouldRenderField(field, values[option])) return null;
+                return (
+                  <Field
+                    key={`${option}-${id || i}`}
+                    field={field}
+                    value={values[option][id] || ""}
+                    onChange={field.type === "integrations" ? handleAutoSave : handleInputChange}
+                    onSettingsChange={field.type === "integrations" ? handleInputChange : undefined}
+                    values={values[option]}
+                    settingsOption={option}
+                    settingsId={settingsId}
+                    sections={secondarySections}
+                    onSave={field.type === "integrations" ? createIntegrationSaveHandler(option) : undefined}
+                    isSaving={isSaving}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <TabPanel
+              className="mtphrSettings__tabs"
+              activeClass="is-active"
+              tabs={tabs}
+              initialTabName={activeTab}
+              onSelect={setActiveTab}
+            >
+              {(tab) => {
+                const currentSection = primarySections.find(
+                  (section) => section.id === tab.id
+                );
+                if (!currentSection) return null;
 
-                    return (
-                      <Field
-                        key={`${option}-${id || i}`}
-                        field={field}
-                        value={values[option][id] || ""}
-                        onChange={field.type === "integrations" ? handleAutoSave : handleInputChange}
-                        onSettingsChange={field.type === "integrations" ? handleInputChange : undefined}
-                        values={values[option]}
-                        settingsOption={option}
-                        settingsId={settingsId}
-                        sections={secondarySections}
-                        onSave={field.type === "integrations" ? createIntegrationSaveHandler(option) : undefined}
-                        isSaving={isSaving}
-                      />
-                    );
-                  })}
-                </div>
-              );
-            }}
-          </TabPanel>
+                return (
+                  <div
+                    className="mtphrSettings__section"
+                    key={`tab-panel-${tab.id}`}
+                  >
+                    {currentSection.fields.map((field, i) => {
+                      const { option, id } = field;
+                      if (!shouldRenderField(field, values[option])) return null;
+
+                      return (
+                        <Field
+                          key={`${option}-${id || i}`}
+                          field={field}
+                          value={values[option][id] || ""}
+                          onChange={field.type === "integrations" ? handleAutoSave : handleInputChange}
+                          onSettingsChange={field.type === "integrations" ? handleInputChange : undefined}
+                          values={values[option]}
+                          settingsOption={option}
+                          settingsId={settingsId}
+                          sections={secondarySections}
+                          onSave={field.type === "integrations" ? createIntegrationSaveHandler(option) : undefined}
+                          isSaving={isSaving}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              }}
+            </TabPanel>
+          )}
         </CardBody>
 
-        {/* Save Button */}
+        {/* Footer Buttons */}
         <CardFooter className="mtphrSettings__footer">
           <Button
             onClick={handleSave}
@@ -737,6 +784,16 @@ export default ({ settingsId, settingsTitle }) => {
               ? __("Saving…", "mtphr-settings")
               : __("Save Settings", "mtphr-settings")}
           </Button>
+          {showResetButton && (
+            <Button
+              onClick={handleReset}
+              disabled={isSaving}
+              variant="tertiary"
+              isDestructive
+            >
+              {__("Reset", "mtphr-settings")}
+            </Button>
+          )}
         </CardFooter>
 
         {/* Local notice + global snackbar notices */}
