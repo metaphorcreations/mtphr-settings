@@ -45,6 +45,10 @@ Welcome to the Mtphr Settings library documentation. This is a powerful WordPres
 - [Heading Field](Field-Types-Heading-Field) - Section heading field
 - [Spacer Field](Field-Types-Spacer-Field) - Spacing/separator field
 
+## Bundled documentation (in the package)
+
+The repository includes a `docs/` folder (framework overview, field type keys) that is shipped with Composer installs and vendored copies—useful for offline reference and editor/AI context. Start at [`docs/README.md`](../docs/README.md).
+
 ## Quick Links
 
 - [GitHub Repository](https://github.com/${{ github.repository }})

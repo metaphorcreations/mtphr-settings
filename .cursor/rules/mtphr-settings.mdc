@@ -1,0 +1,36 @@
+---
+description: Changelog, wiki, and documentation conventions for the mtphr-settings library (this repo).
+alwaysApply: true
+---
+
+# Mtphr Settings — project rules
+
+## Changelog
+
+- When making updates to the library, update `readme.txt` with brief bulleted entries under the **UNRELEASED** heading.
+- If **UNRELEASED** does not exist, add it at the top of the Changelog section (above the most recent versioned entry).
+- Under UNRELEASED, use the current date as a subheading (e.g. `2026-04-15`) above that day’s bullets; group additional same-day bullets under that date, or add a new date heading for a new day.
+- Keep descriptions short and generic.
+
+## Wiki and bundled docs — keep in sync
+
+When you add or change **field types**, **registration APIs**, **admin UI behavior**, or other **framework functionality**, update **both** of the following in the same change (or as a direct follow-up):
+
+1. **`wiki/`** — Field types: new `wiki/Field-Types-<Field-Name>.md` plus links from `wiki/Home.md`; existing types: edit the matching wiki page. For non-field features, add or adjust the relevant wiki page(s) (e.g. Getting Started) so GitHub Wiki mirrors stay accurate.
+2. **`docs/`** — Refresh `docs/framework.md`, `docs/field-types.md`, and/or `docs/README.md` as needed so Composer-bundled reference matches the code (new `type` strings, hooks, options, APIs).
+
+Do **not** ship code-only changes to fields or core behavior without updating the wiki and docs that those changes affect.
+
+## GitHub wiki (`wiki/`)
+
+- When adding a **new** field type, add `wiki/Field-Types-<Field-Name>.md` following existing field wiki pages (description, usage, properties, examples) and link it from `wiki/Home.md`.
+- When updating an existing field type, update its wiki page to match.
+
+## Bundled developer docs (`docs/`)
+
+- Keep **`docs/`** aligned with shipped behavior (see `docs/README.md`); at minimum, new or renamed field `type` values belong in `docs/field-types.md`, and API or lifecycle changes belong in `docs/framework.md`.
+- Do **not** add ad-hoc markdown elsewhere in the repo except `docs/`, `wiki/`, or when the user explicitly requests a file.
+
+## README
+
+- Do not add a root `README.md` unless explicitly requested.

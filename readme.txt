@@ -1,7 +1,8 @@
 == Changelog ==
 
-= UNRELEASED =
-* ApiConnectionsField removed from core; consuming plugins (e.g. Ditty Pro X) must register the api_connections component via their custom fields bundle
+= 1.1.6 [2026-04-15] =
+* Cursor rules: require updating `wiki/` and `docs/` when adding or changing fields or framework behavior
+* Added bundled developer documentation under `docs/` for Composer installs; migrated `.cursorrules` to `.cursor/rules/mtphr-settings.mdc`
 * Field visibility: support multiple conditions via show/hide with operator (and|or) and conditions array; single-condition object format unchanged
 * Added CloneWrapper — any field type can opt into clone/sort_clone/min_clone/max_clone/add_button props to render multiple bare inputs under one label
 * Added Time field type (native browser time picker, value stored as HH:MM string)
@@ -13,8 +14,6 @@
 * Added section option show_tab_when_single to show the tab bar even when only one primary section exists
 * Hide top-level tab bar when only one primary section exists (unless show_tab_when_single is set)
 * Fixed sub-page sections not rendering due to incorrect parent_slug filtering in get_sections
-* Added API Connections field for multi-account OAuth connection management
-* ApiConnectionsField: added optional clear_cache_url/clear_cache_nonce/clear_cache_label to show a destructive "Clear Cache" button; uses fetch DELETE to a REST endpoint and shows an inline success/error confirmation without reloading the page
 
 = 1.1.5 [2026-02-28] =
 * Added Notification field with support for success, error, warning, and info types
