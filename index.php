@@ -1,5 +1,5 @@
 <?php
-namespace MaddenMedia\KrakenCore;
+namespace Mtphr;
 
 /**
  * Create the class
