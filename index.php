@@ -1,5 +1,5 @@
 <?php
-namespace Mtphr;
+namespace MaddenMedia\KrakenCore;
 
 /**
  * Create the class
@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.1.6.1';
+  private $version = '1.1.7';
   private $id = '';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -38,14 +38,14 @@ final class Settings {
    * Set up the instance
    */
   public static function instance() {
-    if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Settings ) ) {	
+    if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Settings ) ) {
 			self::$instance = new Settings;
-      
+
       // Initialize the ID based on namespace
       if ( empty( self::$instance->id ) ) {
         self::$instance->id = self::$instance->get_namespace_identifier();
       }
-      
+
       // Register WordPress hooks for admin functionality
       add_action( 'admin_menu', array( self::$instance, 'create_admin_pages' ) );
       add_action( 'admin_enqueue_scripts', array( self::$instance, 'enqueue_scripts' ) );
@@ -151,11 +151,11 @@ final class Settings {
   private function get_namespace_identifier() {
     $reflection = new \ReflectionClass( $this );
     $namespace = $reflection->getNamespaceName();
-    
+
     // Convert namespace to identifier by removing backslashes
     // e.g., "Mtphr\PostDuplicator" -> "MtphrPostDuplicator"
     $identifier = str_replace( '\\', '', $namespace );
-    
+
     // Fallback to 'mtphr' if namespace is empty (shouldn't happen, but safety check)
     return ! empty( $identifier ) ? $identifier : 'mtphr';
   }
@@ -242,15 +242,15 @@ final class Settings {
     // Check if submenu and same slug exists with same parent
     } else {
       $exists = array_filter( $admin_pages, function ( $page ) use ( $admin_page ) {
-        return isset( $page['parent_slug'] ) 
-          && $page['parent_slug'] === $admin_page['parent_slug'] 
+        return isset( $page['parent_slug'] )
+          && $page['parent_slug'] === $admin_page['parent_slug']
           && $page['menu_slug'] === $admin_page['menu_slug'];
       } );
       if ( ! empty( $exists ) ) {
         return false;
       }
     }
-    
+
     $admin_pages[] = $admin_page;
     self::$instance->admin_pages = $admin_pages;
     return self::$instance->admin_pages;
@@ -355,7 +355,7 @@ final class Settings {
     // Check if top level and slug already exists
     if ( ! isset( $section['parent_slug'] ) ) {
       $exists = array_filter( $sections, function ( $s ) use ( $section ) {
-        return $s['menu_slug'] === $section['menu_slug'] 
+        return $s['menu_slug'] === $section['menu_slug']
           && $s['id'] === $section['id'];
       } );
       if ( ! empty( $exists ) ) {
@@ -458,7 +458,7 @@ final class Settings {
       }
       $setting['option'] = $section['option'];
     }
-    
+
     if ( ! isset( $setting['order'] ) ) {
       $setting['order'] = $default_order;
     }
@@ -467,7 +467,7 @@ final class Settings {
     if ( ! in_array( $setting['section'], array_column( $sections, 'id' ) ) ) {
       return false;
     }
- 
+
     $settings[] = $setting;
     self::$instance->settings = $settings;
 
@@ -495,10 +495,10 @@ final class Settings {
         $field['section'] = $data['section'];
         if ( $setting = self::$instance->add_field( $field ) ) {
           $updated_settings[] = $setting;
-        } 
+        }
       }
     }
-    
+
     return $updated_settings;
   }
 
@@ -622,8 +622,12 @@ final class Settings {
       if ( !empty( $parents ) ) {
         foreach ( $parents as $parent ) {
           if ( !isset( $type_target[$parent] ) || !is_array( $type_target[$parent] ) ) {
+            // Preserve the parent's own type string (e.g. 'repeater') when promoting
+            // it to an array. Using $type here would record the *child* field's type
+            // as the parent's __type, causing repeater rows to be treated as groups.
+            $parent_type = isset( $type_target[$parent] ) ? $type_target[$parent] : $type;
             $type_target[$parent] = [
-              '__type' => $type
+              '__type' => $parent_type,
             ];
           }
           // if ( !isset( $default_target[$parent] ) || !is_array( $default_target[$parent] ) ) {
@@ -801,7 +805,7 @@ final class Settings {
     }
     return $encryption_settings;
   }
-  
+
   /**
    * Get field type settings
    */
@@ -860,7 +864,7 @@ final class Settings {
     // Update the option
     update_option( $option, $option_values );
 
-    // Update the 
+    // Update the
     $values[$option] = $option_values;
     self::$instance->values = $value;
 
@@ -876,7 +880,7 @@ final class Settings {
     if ( ! is_array( self::$instance->values ) ) {
       self::$instance->values = [];
     }
-    
+
     // If the option values have been compiled, return them
     $cache = false;
     if ( isset( self::$instance->values[$option] ) && $cache ) {
@@ -895,10 +899,10 @@ final class Settings {
 
     // Inject defaults
     $parsed_settings = self::$instance->inject_default_values( $settings, $option );
-    
+
     // Sanitize
     $sanitized_settings = self::$instance->sanitize_values( $parsed_settings, $option, 'get' );
-    
+
     // Add to the global values array
     self::$instance->values[$option] = $sanitized_settings;
 
@@ -964,7 +968,7 @@ final class Settings {
             isset( $admin_page['position'] ) ? $admin_page['position'] : null,
           );
           $updated_admin_pages[$id] = $admin_page;
-        }  
+        }
       }
     }
     self::$instance->admin_pages = $updated_admin_pages;
@@ -987,7 +991,7 @@ final class Settings {
     $settings = self::$instance->get_settings( $sections );
     $options = self::$instance->get_option_keys( $sections );
     $values = self::$instance->get_values( $options );
-    
+
     // Get header metadata (icon, description, version) from admin page
     // Only escape URL if it's actually a URL (starts with http:// or https://)
     // Otherwise, pass it as-is for dashicons or WordPress icon names
@@ -1030,7 +1034,7 @@ final class Settings {
       array_unique( array_merge( $asset_file['dependencies'], ['wp-element', 'wp-data', 'wp-components', 'wp-notices'] ) ),
       filemtime( self::$instance->settings_dir . 'assets/build/mtphrSettings.js' ),
       true
-    ); 
+    );
 
     $show_reset_button = ! empty( $admin_page['show_reset_button'] );
     $default_values = self::$instance->get_default_values( $options );
@@ -1076,7 +1080,7 @@ final class Settings {
             $values[$option] = $updated_values;
           }
         }
-        
+
         //self::$instance->update_values( $values );
         return rest_ensure_response( $values , 200);
       },
@@ -1086,7 +1090,7 @@ final class Settings {
   /**
    * Inject default values into $values if they do not exist.
    */
-  private function inject_default_values( $values, $option ) { 
+  private function inject_default_values( $values, $option ) {
     $default_values = self::$instance->get_default_values( $option );
     return $this->recursive_inject_default_values( $values, $default_values );
   }
@@ -1107,9 +1111,9 @@ final class Settings {
         }
 
         // Recursively process nested arrays
-        $values[$key] = $this->recursive_inject_default_values( 
-          $values[$key], 
-          $default_value 
+        $values[$key] = $this->recursive_inject_default_values(
+          $values[$key],
+          $default_value
         );
       } else {
         // Only inject default if key does not exist in $values
@@ -1141,7 +1145,7 @@ final class Settings {
 
     // 2) Retrieve the encryption settings for this option
     $encryption_settings = $this->get_encryption_settings( $option );
-    
+
     // 3) Recursively encrypt the updated values
     $updated_values = $this->encrypt_values( $updated_values, $encryption_settings );
 
@@ -1198,8 +1202,8 @@ final class Settings {
             }
         } else {
             // Get the sanitizer for this specific key, or fallback to default
-            $sanitizer = isset( $sanitize_settings[$key] ) 
-                ? $sanitize_settings[$key] 
+            $sanitizer = isset( $sanitize_settings[$key] )
+                ? $sanitize_settings[$key]
                 : self::$instance->get_default_sanitizer();
 
             $existing_values[$key] = self::$instance->sanitize_value( $value, $sanitizer, $key, $option, 'update' );
@@ -1213,7 +1217,7 @@ final class Settings {
   /**
    * Sanitize a value
    */
-  private function sanitize_values( $values, $option, $type = false ) { 
+  private function sanitize_values( $values, $option, $type = false ) {
     $sanitize_settings = self::$instance->get_sanitize_settings( $option );
     $type_settings     = self::$instance->get_type_settings( $option );
     return $this->recursive_sanitize_values( $values, $sanitize_settings, $option, $type_settings, $type );
@@ -1249,7 +1253,7 @@ final class Settings {
           } else {
             // Recursively sanitize nested arrays using the same key structure
             $sanitized_values[$key] = $this->recursive_sanitize_values(
-              $value, 
+              $value,
               isset( $sanitize_settings[$key] ) ? $sanitize_settings[$key] : [],
               $option,
               $current_field_type,
@@ -1257,10 +1261,10 @@ final class Settings {
             );
           }
         } else {
-          
+
           // Retrieve the appropriate sanitizer or fallback to the default
-          $sanitizer = isset( $sanitize_settings[$key] ) 
-            ? $sanitize_settings[$key] 
+          $sanitizer = isset( $sanitize_settings[$key] )
+            ? $sanitize_settings[$key]
             : self::$instance->get_default_sanitizer();
 
           $sanitized_values[$key] = self::$instance->sanitize_value( $value, $sanitizer, $key, $option, $type );
@@ -1273,7 +1277,7 @@ final class Settings {
   /**
    * Loop through an array and sanitize values
    */
-  private function loop_sanitize_value( $value, $sanitizer ) { 
+  private function loop_sanitize_value( $value, $sanitizer ) {
     $sanitized_value = [];
     if ( is_array( $value ) && ! empty( $value ) ) {
       foreach ( $value as $key => $val ) {
@@ -1291,7 +1295,7 @@ final class Settings {
   /**
    * Sanitize a value
    */
-  private function sanitize_value( $value, $sanitizer, $key, $option, $type = false ) { 
+  private function sanitize_value( $value, $sanitizer, $key, $option, $type = false ) {
     switch( $sanitizer ) {
       case 'esc_attr':
       case 'sanitize_text_field':
@@ -1315,10 +1319,10 @@ final class Settings {
 
   /**
    * Recursively encrypt values based on encryption settings.
-   * 
-   * - If `['key_1' => X, 'key_2' => Y]` is found at `$encryption_settings[$key]`, 
+   *
+   * - If `['key_1' => X, 'key_2' => Y]` is found at `$encryption_settings[$key]`,
    *   encrypt the entire `$values[$key]` with those keys and **do not** recurse deeper.
-   * - Otherwise, if `$encryption_settings[$key]` is an array but lacks `key_1`/`key_2`, 
+   * - Otherwise, if `$encryption_settings[$key]` is an array but lacks `key_1`/`key_2`,
    *   we assume it's a nested structure and continue recursing.
    */
   private function encrypt_values( $values, $encryption_settings ) {
@@ -1337,8 +1341,8 @@ final class Settings {
       if ( is_array( $enc_info ) && isset( $enc_info['key_1'] ) && isset( $enc_info['key_2'] ) ) {
         // Encrypt this entire branch with the custom keys and skip children.
         $values[$key] = $this->encrypt( $values[$key], $enc_info['key_1'], $enc_info['key_2'] );
-      } 
-      // If $enc_info is an array but no direct 'key_1'/'key_2', 
+      }
+      // If $enc_info is an array but no direct 'key_1'/'key_2',
       // it's likely nested encryption settings. Recurse deeper if $values[$key] is array.
       elseif ( is_array( $enc_info ) ) {
         if ( is_array( $values[$key] ) ) {
@@ -1427,10 +1431,10 @@ final class Settings {
     $iv  = substr( hash( 'sha256', $key_2 ), 0, 16 );
 
     $output = openssl_decrypt(
-      base64_decode( $string ), 
-      'AES-256-CBC', 
-      $key, 
-      0, 
+      base64_decode( $string ),
+      'AES-256-CBC',
+      $key,
+      0,
       $iv
     );
 

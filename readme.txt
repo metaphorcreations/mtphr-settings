@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 1.1.7 [2026-05-02] =
+* Integrations field: added `custom_html` integration property to render arbitrary HTML below the description in the integration card
+* Integrations field: added `modal_size` integration property (`small|medium|large|fill`) to open settings modal as a sized dialog instead of full-screen
+* IntegrationModal: replaced Close/Save/Save & Close buttons with Cancel and Save & Close; Cancel reverts field changes made during the modal session
+* IntegrationModal: pressing Escape or clicking the modal backdrop now triggers Cancel (reverts changes) instead of closing without reverting
+* App: `onSave` is now forwarded to `block_manager` fields in addition to `integrations` fields
+* Fixed bug in `process_setting_data` where a repeater field's `__type` was overwritten with the first sub-field's type when sub-fields were processed, causing repeater rows to be sanitized as plain groups (with `wp_kses_post` applied to every value including raw SVG); the parent's own registered type string is now preserved when the entry is promoted from a scalar to an array
+
 = 1.1.6 [2026-04-15] =
 * Cursor rules: require updating `wiki/` and `docs/` when adding or changing fields or framework behavior
 * Added bundled developer documentation under `docs/` for Composer installs; migrated `.cursorrules` to `.cursor/rules/mtphr-settings.mdc`

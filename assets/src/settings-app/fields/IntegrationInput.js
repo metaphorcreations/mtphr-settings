@@ -30,7 +30,14 @@ const IntegrationInput = ({
   onSave,
   isSaving,
 }) => {
-  const { id, label, description, logo } = integration;
+  const {
+    id,
+    label,
+    description,
+    logo,
+    custom_html: customHtml,
+    modal_size: modalSize,
+  } = integration;
 
   const params = new URLSearchParams(window.location.search);
   const activeIntegration = params.get(queryVar);
@@ -100,6 +107,12 @@ const IntegrationInput = ({
             <VStack spacing={0}>
               <Heading level={4}>{label}</Heading>
               {description && <Text>{description}</Text>}
+              {customHtml && (
+                <div
+                  className="integration__custom-html"
+                  dangerouslySetInnerHTML={{ __html: customHtml }}
+                />
+              )}
             </VStack>
           </VStack>
         </CardHeader>
@@ -133,6 +146,7 @@ const IntegrationInput = ({
           onCloseSettings={closeSettings}
           onSave={onSave}
           isSaving={isSaving}
+          modalSize={modalSize}
         />
       )}
     </Card>

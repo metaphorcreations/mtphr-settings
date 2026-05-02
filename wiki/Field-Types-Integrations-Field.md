@@ -59,8 +59,10 @@ Each integration in the `integrations` array should have:
 - `id` (string, required) - Unique integration identifier
 - `label` (string, required) - Integration name
 - `description` (string, optional) - Integration description
+- `custom_html` (string, optional) - Arbitrary HTML rendered directly below the description in the integration card (e.g. status badges, links, notes). Output is **not** escaped, so only pass trusted markup.
 - `is_authorized` (boolean, optional) - Whether the integration is authorized/connected
 - `settings` (string, optional) - Section ID containing integration-specific settings
+- `modal_size` (string, optional) - Size of the settings modal. Accepts `'small'`, `'medium'`, `'large'`, or `'fill'`. When omitted the modal opens full-screen (default behaviour).
 
 ## Integration Settings
 
@@ -156,6 +158,34 @@ Settings::fields( [
         'option' => 'my_settings',
     ],
 ] );
+```
+
+### Custom HTML Below Description
+
+Use `custom_html` to render arbitrary markup (status badges, links, notes, etc.) directly under the integration's description inside the card:
+
+```php
+[
+    'id'          => 'stripe',
+    'label'       => 'Stripe',
+    'description' => 'Payment processing',
+    'custom_html' => '<a href="https://dashboard.stripe.com" target="_blank">Open dashboard</a>',
+]
+```
+
+The HTML is output as-is, so only pass trusted markup that you control.
+
+### Sized Settings Modal
+
+By default the settings modal opens full-screen. Set `modal_size` on an integration to open a smaller dialog instead:
+
+```php
+[
+    'id'         => 'stripe',
+    'label'      => 'Stripe',
+    'settings'   => 'stripe_settings',
+    'modal_size' => 'large', // 'small' | 'medium' | 'large' | 'fill'
+]
 ```
 
 ## Auto-Save Behavior

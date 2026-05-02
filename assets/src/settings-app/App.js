@@ -720,7 +720,7 @@ export default ({ settingsId, settingsTitle }) => {
                     settingsOption={option}
                     settingsId={settingsId}
                     sections={secondarySections}
-                    onSave={field.type === "integrations" ? createIntegrationSaveHandler(option) : undefined}
+                    onSave={field.type === "integrations" || field.type === "block_manager" ? createIntegrationSaveHandler(option) : undefined}
                     isSaving={isSaving}
                   />
                 );
@@ -760,7 +760,7 @@ export default ({ settingsId, settingsTitle }) => {
                           settingsOption={option}
                           settingsId={settingsId}
                           sections={secondarySections}
-                          onSave={field.type === "integrations" ? createIntegrationSaveHandler(option) : undefined}
+                          onSave={field.type === "integrations" || field.type === "block_manager" ? createIntegrationSaveHandler(option) : undefined}
                           isSaving={isSaving}
                         />
                       );
