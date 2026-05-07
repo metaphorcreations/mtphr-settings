@@ -157,11 +157,21 @@ Customize the settings page header:
 Settings::admin_page( [
     'id' => 'my-plugin-settings',
     'title' => 'My Plugin Settings',
-    'header_icon' => 'dashicons-admin-settings', // or URL to image
-    'header_description' => 'Configure your plugin settings',
+    'header_icon' => 'dashicons-admin-settings', // dashicon, URL, data: URI, or inline SVG string
+    'header_icon_width' => '48px',               // optional CSS width applied to the icon
+    'header_description' => 'Configure your plugin settings', // plain text or HTML markup
     'header_version' => '1.0.0',
 ] );
 ```
+
+**`header_icon`** accepts:
+- A dashicon class name (e.g. `'dashicons-admin-settings'`) or WordPress icon name
+- A full URL (`http://` / `https://`) or `data:` URI pointing to an image
+- A raw inline SVG string starting with `<svg` — passed through as-is and rendered directly in the DOM
+
+**`header_icon_width`** — optional CSS width value (e.g. `'48px'`, `'2rem'`) applied to the icon element. When set on a URL/data-URI image the height is set to `auto`; on an inline SVG the same width/height:auto style is applied.
+
+**`header_description`** — when the value contains HTML tags it is rendered as raw HTML markup; plain strings are wrapped in a `<p>` element.
 
 ### Sidebar
 

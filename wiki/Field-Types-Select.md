@@ -41,6 +41,8 @@ Settings::fields( [
 - `class` (string) - Additional CSS classes
 - `labelPosition` (string) - Label position: `'top'` (default) | `'side'` | `'bottom'`
 - `std` (string|array) - Default value (string for single, array for multiple)
+- `allow_custom` (boolean) - Append a "Custom…" option that reveals a free-text input, allowing any value not present in `choices`
+- `custom_placeholder` (string) - Placeholder text shown in the custom input (default: `'Enter custom value'`)
 - `show` (array) - Conditional display: `['id' => 'field_id', 'value' => expected_value]`
 - `hide` (array) - Conditional hide: `['id' => 'field_id', 'value' => expected_value]`
 
@@ -119,6 +121,27 @@ Choices can be provided in two formats:
     ],
     'section' => 'general',
     'option' => 'my_settings',
+]
+```
+
+### Custom Value Input
+
+When `allow_custom` is `true`, a "Custom…" option is appended to the list. Selecting it reveals a plain text input, and the typed value is saved as the field value. Use `custom_placeholder` to customise the input hint.
+
+```php
+[
+    'id' => 'font_size',
+    'type' => 'select',
+    'label' => 'Font Size',
+    'choices' => [
+        'small'  => 'Small',
+        'medium' => 'Medium',
+        'large'  => 'Large',
+    ],
+    'allow_custom'       => true,
+    'custom_placeholder' => 'e.g. 18px',
+    'section' => 'general',
+    'option'  => 'my_settings',
 ]
 ```
 

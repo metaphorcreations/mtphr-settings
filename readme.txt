@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 1.1.8 [2026-05-07] =
+* Added `header_icon_width` page option to control the rendered width of the header icon
+* Header icon now supports inline SVG strings passed directly in config
+* Header icon now supports `data:` URI images
+* Header description now renders HTML markup when the value contains HTML tags
+* Select field: added `allow_custom` option that appends a "Custom…" choice and reveals a free-text input
+* Select field: choices now accept an object (key/value pairs) in addition to an array
+
 = 1.1.7 [2026-05-02] =
 * Integrations field: added `custom_html` integration property to render arbitrary HTML below the description in the integration card
 * Integrations field: added `modal_size` integration property (`small|medium|large|fill`) to open settings modal as a sized dialog instead of full-screen

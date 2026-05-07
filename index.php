@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.1.7';
+  private $version = '1.1.8';
   private $id = '';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -1000,11 +1000,15 @@ final class Settings {
     if ( $header_icon_raw ) {
       if ( strpos( $header_icon_raw, 'http://' ) === 0 || strpos( $header_icon_raw, 'https://' ) === 0 ) {
         $header_icon = esc_url( $header_icon_raw );
+      } elseif ( strpos( $header_icon_raw, '<svg' ) === 0 ) {
+        // Raw inline SVG — developer-supplied config, pass through as-is
+        $header_icon = $header_icon_raw;
       } else {
-        // For dashicons or WordPress icon names, pass as-is (but sanitize)
+        // Dashicons, WordPress icon names, or data: URIs
         $header_icon = sanitize_text_field( $header_icon_raw );
       }
     }
+    $header_icon_width  = isset( $admin_page['header_icon_width'] ) ? esc_attr( $admin_page['header_icon_width'] ) : '';
     $header_description = isset( $admin_page['header_description'] ) ? $admin_page['header_description'] : '';
     $header_version = isset( $admin_page['header_version'] ) ? esc_html( $admin_page['header_version'] ) : '';
 
@@ -1050,6 +1054,7 @@ final class Settings {
       'sidebar_width'      => self::$instance->get_sidebar_width(),
       'main_max_width'     => self::$instance->get_main_content_max_width(),
       'header_icon'        => $header_icon,
+      'header_icon_width'  => $header_icon_width,
       'header_description' => $header_description,
       'header_version'     => $header_version,
       'show_reset_button'  => $show_reset_button,

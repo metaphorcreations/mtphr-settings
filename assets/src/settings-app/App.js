@@ -120,6 +120,7 @@ export default ({ settingsId, settingsTitle }) => {
     sidebar_width: sidebarWidth = '320px',
     main_max_width: mainMaxWidth = '1000px',
     header_icon: headerIcon = '',
+    header_icon_width: headerIconWidth = '',
     header_description: headerDescription = '',
     header_version: headerVersion = '',
     show_reset_button: showResetButton = false,
@@ -470,16 +471,32 @@ export default ({ settingsId, settingsTitle }) => {
    * @param {string} alt - Alt text for the icon
    * @returns {JSX.Element|null}
    */
-  const renderHeaderIcon = (icon, alt) => {
+  const renderHeaderIcon = (icon, alt, width = '') => {
     if (!icon) return null;
 
-    // Check if it's a URL (http:// or https://)
-    if (icon.startsWith('http://') || icon.startsWith('https://')) {
+    // Inline SVG string
+    if (icon.startsWith('<svg')) {
+      const style = width ? { width, height: 'auto' } : {};
+      return (
+        <div
+          aria-label={alt}
+          role="img"
+          style={style}
+          dangerouslySetInnerHTML={{ __html: icon }}
+        />
+      );
+    }
+
+    // Check if it's a URL (http://, https://, or data: URI)
+    if (icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('data:')) {
+      const imgStyle = width
+        ? { width, height: 'auto' }
+        : { maxWidth: '48px', maxHeight: '48px', width: 'auto', height: 'auto' };
       return (
         <img
           src={icon}
           alt={alt}
-          style={{ maxWidth: '48px', maxHeight: '48px', width: 'auto', height: 'auto' }}
+          style={imgStyle}
         />
       );
     }
@@ -650,16 +667,18 @@ export default ({ settingsId, settingsTitle }) => {
           <div className="mtphrSettings__header">
             {headerIcon && (
               <div className="mtphrSettings__header-icon">
-                {renderHeaderIcon(headerIcon, settingsTitle ? he.decode(settingsTitle) : settingsTitle)}
+                {renderHeaderIcon(headerIcon, settingsTitle ? he.decode(settingsTitle) : settingsTitle, headerIconWidth)}
               </div>
             )}
             <div className="mtphrSettings__header-content">
               <Heading className="mtphrSettings__header-title" style={{ padding: 0 }} level={1}>{settingsTitle ? he.decode(settingsTitle) : settingsTitle}</Heading>
-              {headerDescription && (
-                <p className="mtphrSettings__header-description">
-                  {he.decode(headerDescription)}
-                </p>
-              )}
+              {headerDescription && (() => {
+                const decoded = he.decode(headerDescription);
+                if (/<[a-z][\s\S]*>/i.test(decoded)) {
+                  return <div className="mtphrSettings__header-description" dangerouslySetInnerHTML={{ __html: decoded }} />;
+                }
+                return <p className="mtphrSettings__header-description">{decoded}</p>;
+              })()}
             </div>
             {headerVersion && (
               <div className="mtphrSettings__header-version">
