@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.1.8';
+  private $version = '1.1.8.1';
   private $id = '';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -1081,8 +1081,8 @@ final class Settings {
         if ( is_array( $value_keys ) && ! empty( $value_keys ) ) {
           foreach ( $value_keys as $option => $keys ) {
             $values_to_update = array_intersect_key( $values[$option], array_flip( $keys ) );
-            $updated_values = self::$instance->update_values( $option, $values_to_update );
-            $values[$option] = $updated_values;
+            self::$instance->update_values( $option, $values_to_update );
+            $values[$option] = self::$instance->get_option_values( $option );
           }
         }
 
