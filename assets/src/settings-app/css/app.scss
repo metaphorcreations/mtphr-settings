@@ -286,6 +286,17 @@
 		display: none !important;
 	}
 
+	// Inset save/status notices so they don't run edge to edge.
+	&__notices {
+		&:not(:has(.components-notice)) {
+			display: none;
+		}
+
+		.components-notice {
+			margin: 16px 20px 0;
+		}
+	}
+
 	// Header styles
 	&__header {
 		display: flex;
@@ -426,3 +437,72 @@
 //       flex: 1;
 //   }
 // }
+
+// ─── Image Picker field ─────────────────────────────────────────────────────
+
+.mtphrSettings__image-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 4px;
+
+	&__preview {
+		position: relative;
+		display: inline-block;
+
+		img.mtphrSettings__image-picker__thumb {
+			display: block;
+			max-width: 120px;
+			max-height: 80px;
+			border-radius: 3px;
+			border: 1px solid #ddd;
+			object-fit: cover;
+		}
+	}
+
+	&__remove {
+		position: absolute;
+		top: -6px;
+		right: -6px;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #cc1818;
+		color: #fff;
+		border: none;
+		cursor: pointer;
+		font-size: 13px;
+		line-height: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+
+		&:hover {
+			background: #a00;
+		}
+	}
+
+	&__row {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+
+	&__url-input {
+		flex: 1;
+		min-width: 0;
+		height: 40px;
+		padding: 0 8px;
+		border: 1px solid #757575;
+		border-radius: 2px;
+		font-size: 13px;
+		color: #1e1e1e;
+
+		&:focus {
+			border-color: var(--wp-admin-theme-color, #007cba);
+			outline: 2px solid transparent;
+			box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #007cba);
+		}
+	}
+}

@@ -691,7 +691,7 @@ export default ({ settingsId, settingsTitle }) => {
         </CardHeader>
 
         {/* Toolbar Slot for top-level controls */}
-        <div className="toolbar">
+        <div className="mtphrSettings__notices">
           <Slot />
         </div>
 

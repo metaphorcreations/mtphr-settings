@@ -12,6 +12,7 @@ import EddLicenseInput from "../fields/EddLicenseInput";
 import Field from "../fields/Field";
 import GroupField from "../fields/GroupField";
 import HeadingField from "../fields/HeadingField";
+import ImagePickerInput from "../fields/ImagePickerInput";
 import IntegrationInput from "../fields/IntegrationInput";
 import LinksInput from "../fields/LinksInput";
 import IntegrationModal from "../fields/IntegrationModal";
@@ -45,6 +46,7 @@ if (registerComponent) {
   registerComponent("field", Field);
   registerComponent("group", GroupField);
   registerComponent("heading", HeadingField);
+  registerComponent("image_picker", ImagePickerInput);
   registerComponent("integration_input", IntegrationInput);
   registerComponent("links", LinksInput);
   registerComponent("integration_modal", IntegrationModal);
