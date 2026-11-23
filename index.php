@@ -1,5 +1,5 @@
 <?php
-namespace Mtphr;
+namespace Ditty\One;
 
 /**
  * Create the class
@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.1.8.1';
+  private $version = '1.1.8.2';
   private $id = '';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';

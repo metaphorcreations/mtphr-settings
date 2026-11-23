@@ -1,6 +1,14 @@
 == Changelog ==
 
-= 1.1.8 [2026-05-07] =
+= 1.1.8.2 [2026-11-11] =
+
+= 2026-11-07 =
+* Inset the settings save notice so it has margin inside the settings card
+
+= 2026-06-02 =
+* Added `image_picker` field type — single-image selector combining a WP media library picker and a plain URL text input; stores a string URL
+
+
 * Added `header_icon_width` page option to control the rendered width of the header icon
 * Header icon now supports inline SVG strings passed directly in config
 * Header icon now supports `data:` URI images
