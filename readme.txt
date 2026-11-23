@@ -1,5 +1,17 @@
 == Changelog ==
 
+= UNRELEASED =
+
+= 2026-11-23 =
+* Security: the settings REST route only saves options that a registered section uses
+* Security: encrypted values now use a random IV and an HMAC; values saved in the old format are still read
+* Added `Settings::set_encryption_keys()` so plugins can encrypt with site-specific keys
+* Fixed `set_default_encryption_keys()` assigning `key_2` to the first key
+* `set_encryption_keys()` accepts `previous` key pairs that are still tried when reading
+* Added `Settings::get_decryption_failures()` to list encrypted values saved with keys the site no longer has
+* Reading old-format values no longer risks returning garbage when the keys changed
+* Docs: encryption keys, key rotation and the settings route's option check
+
 = 1.1.8.3 [2026-11-23] =
 * Bug fix
 

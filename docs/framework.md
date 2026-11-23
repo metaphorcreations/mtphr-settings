@@ -38,6 +38,8 @@ Sections must exist **before** fields that reference them. Fields resolve `optio
 | `Settings::default_values( $option, $values )` | Default option array for `get_option`. |
 | `Settings::sanitize_settings( $option, $map )` | Per-field sanitizers (callable names). |
 | `Settings::encryption_settings( $option, $map )` | Which keys are encrypted at rest. |
+| `Settings::set_encryption_keys( $keys )` | Default encryption keys (`key_1`, `key_2`, optional `previous` pairs). Call before `encryption_settings()`. See [Encryption](#encryption). |
+| `Settings::get_decryption_failures( $option )` | Encrypted keys in `$option` that couldn't be read because they were saved with keys the site no longer has. |
 | `Settings::get_value( $option, $key = false )` | Read saved values (with decrypt + defaults). |
 | `Settings::set_value( $option, $key, $value )` | Persist values (supports array batch as second arg — see source). |
 
@@ -88,9 +90,31 @@ Because there is a **single singleton** per class namespace, “extend” behavi
 
 If your add-on uses a different namespace, it is a **separate** `Settings` instance — not the same admin app. Coordinate via the host’s hooks and APIs.
 
+## Encryption
+
+Values listed in `encryption_settings()` (or fields with `'encrypt' => true`) are encrypted with AES-256-CBC, a random IV and an HMAC-SHA256, and stored as `mse2:` followed by base64. Values saved by earlier versions (a fixed IV, no prefix) are still read; each option is re-saved in the new format the next time it is updated.
+
+By default every plugin uses the same built-in keys, which only obfuscates the data. Give the framework keys unique to the site, for example derived from its salts:
+
+```php
+$secret = wp_salt( 'auth' ) . wp_salt( 'secure_auth' );
+Settings::set_encryption_keys( [
+    'key_1' => hash_hmac( 'sha256', 'my-plugin-1', $secret ),
+    'key_2' => hash_hmac( 'sha256', 'my-plugin-2', $secret ),
+] );
+Settings::encryption_settings( 'my_plugin_settings', [ 'api_key' => true ] );
+```
+
+- Call it on `{get_id()}/init_settings`, **before** `encryption_settings()` and before fields are registered, because each encrypted key records the keys in effect when it is registered.
+- Values saved with the built-in keys keep working after you switch: reading tries the current keys, then any `previous` pairs, then the built-in keys (old format only).
+- To move to new keys without losing values, pass the old pair under `previous`: `[ 'key_1' => …, 'key_2' => …, 'previous' => [ [ 'key_1' => …, 'key_2' => … ] ] ]`.
+- A value saved with keys that are no longer current or previous (for example after the site's salts changed) reads as `''`. `Settings::get_decryption_failures( $option )` lists those keys so the plugin can tell the site owner to re-enter them. Saving the option again clears the list.
+- Older framework versions can't read the new format, so rolling a plugin back to one means re-entering encrypted values.
+
 ## REST and scripts
 
 - REST base: `{get_id()}/v1` (see `register_rest_route` in `index.php`).
+- The `settings` route saves only options that a registered section uses (`Settings::section()`'s `option`); other option names in the request are ignored.
 - Admin enqueue runs only on screens registered in `admin_pages` for the current screen id.
 
 For deeper UI behavior of each field type, see the wiki `wiki/Field-Types-*` pages and [field-types.md](field-types.md).

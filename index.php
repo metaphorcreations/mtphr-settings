@@ -8,7 +8,7 @@ final class Settings {
 
   private static $instance;
 
-  private $version = '1.1.8.3';
+  private $version = '1.1.8.4';
   private $id = '';
   private $textdomain = 'mtphr-settings';
   private $settings_dir = '';
@@ -33,6 +33,21 @@ final class Settings {
   private $default_sanitizer = 'wp_kses_post';
   private $encryption_key_1 = '7Q@_DvLVTiHPEA';
   private $encryption_key_2 = 'YgM2iCX-BtoBpJ';
+
+  // The built-in keys, kept so values saved before set_encryption_keys()
+  // was used can still be read.
+  const LEGACY_KEY_1 = '7Q@_DvLVTiHPEA';
+  const LEGACY_KEY_2 = 'YgM2iCX-BtoBpJ';
+
+  // Prefix for values saved with a random IV and an HMAC.
+  const ENCRYPTION_PREFIX = 'mse2:';
+
+  // Earlier default keys, still tried when reading (see set_encryption_keys()).
+  private $previous_encryption_keys = [];
+
+  // Encrypted values that failed their integrity check, by option.
+  private $decryption_failures = [];
+  private $last_decrypt_failed = false;
 
   /**
    * Set up the instance
@@ -217,7 +232,15 @@ final class Settings {
       self::$instance->encryption_key_1 = esc_attr( $keys['key_1'] );
     }
     if ( isset( $keys['key_2'] ) ) {
-      self::$instance->encryption_key_1 = esc_attr( $keys['key_2'] );
+      self::$instance->encryption_key_2 = esc_attr( $keys['key_2'] );
+    }
+    if ( isset( $keys['previous'] ) && is_array( $keys['previous'] ) ) {
+      self::$instance->previous_encryption_keys = [];
+      foreach ( $keys['previous'] as $previous ) {
+        if ( isset( $previous['key_1'], $previous['key_2'] ) ) {
+          self::$instance->previous_encryption_keys[] = [ esc_attr( $previous['key_1'] ), esc_attr( $previous['key_2'] ) ];
+        }
+      }
     }
   }
 
@@ -895,7 +918,8 @@ final class Settings {
 
     // Decrypt
     $enc_settings = $this->get_encryption_settings( $option );
-    $settings     = $this->decrypt_values( $settings, $enc_settings );
+    unset( self::$instance->decryption_failures[ $option ] );
+    $settings     = $this->decrypt_values( $settings, $enc_settings, $option );
 
     // Inject defaults
     $parsed_settings = self::$instance->inject_default_values( $settings, $option );
@@ -1079,7 +1103,12 @@ final class Settings {
         $values = isset( $data['values'] ) ? $data['values'] : [];
 
         if ( is_array( $value_keys ) && ! empty( $value_keys ) ) {
+          // Only options that a registered section saves to can be written.
+          $allowed_options = (array) self::$instance->get_options();
           foreach ( $value_keys as $option => $keys ) {
+            if ( ! in_array( $option, $allowed_options, true ) || ! is_array( $keys ) || ! isset( $values[$option] ) || ! is_array( $values[$option] ) ) {
+              continue;
+            }
             $values_to_update = array_intersect_key( $values[$option], array_flip( $keys ) );
             self::$instance->update_values( $option, $values_to_update );
             $values[$option] = self::$instance->get_option_values( $option );
@@ -1382,12 +1411,17 @@ final class Settings {
     $key_1 = $custom_key_1 ?: $this->encryption_key_1;
     $key_2 = $custom_key_2 ?: $this->encryption_key_2;
 
-    $key = hash( 'sha256', $key_1 );
-    $iv  = substr( hash( 'sha256', $key_2 ), 0, 16 );
+    $key     = hash_hmac( 'sha256', 'encrypt', $key_1 . $key_2, true );
+    $mac_key = hash_hmac( 'sha256', 'mac', $key_1 . $key_2, true );
+    $iv      = random_bytes( 16 );
 
-    return base64_encode(
-      openssl_encrypt( $string, 'AES-256-CBC', $key, 0, $iv )
-    );
+    $ciphertext = openssl_encrypt( (string) $string, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv );
+    if ( false === $ciphertext ) {
+      return '';
+    }
+    $mac = hash_hmac( 'sha256', $iv . $ciphertext, $mac_key, true );
+
+    return self::ENCRYPTION_PREFIX . base64_encode( $iv . $mac . $ciphertext );
   }
 
   /**
@@ -1398,7 +1432,7 @@ final class Settings {
    * - If `$enc_info` is an array but lacks `key_1`/`key_2`, we assume it's nested settings.
    *   We keep recursing into `$values[$key]` if it's an array.
    */
-  private function decrypt_values( $values, $encryption_settings ) {
+  private function decrypt_values( $values, $encryption_settings, $option = '' ) {
     if ( ! is_array( $values ) || ! is_array( $encryption_settings ) ) {
       return $values;
     }
@@ -1411,13 +1445,17 @@ final class Settings {
 
       // If this level has explicit 'key_1' and 'key_2', decrypt the entire branch
       if ( is_array( $enc_info ) && isset( $enc_info['key_1'] ) && isset( $enc_info['key_2'] ) ) {
+        $this->last_decrypt_failed = false;
         $values[$key] = $this->decrypt( $values[$key], $enc_info['key_1'], $enc_info['key_2'] );
+        if ( $this->last_decrypt_failed && '' !== $option ) {
+          self::$instance->decryption_failures[ $option ][ $key ] = $key;
+        }
       }
       // If $enc_info is an array but no direct 'key_1'/'key_2',
       // it might be nested encryption settings. Recurse deeper if $values[$key] is array
       elseif ( is_array( $enc_info ) ) {
         if ( is_array( $values[$key] ) ) {
-          $values[$key] = $this->decrypt_values( $values[$key], $enc_info );
+          $values[$key] = $this->decrypt_values( $values[$key], $enc_info, $option );
         }
       }
     }
@@ -1438,20 +1476,69 @@ final class Settings {
     $key_1 = $custom_key_1 ?: $this->encryption_key_1;
     $key_2 = $custom_key_2 ?: $this->encryption_key_2;
 
-    $key = hash( 'sha256', $key_1 );
-    $iv  = substr( hash( 'sha256', $key_2 ), 0, 16 );
+    // The current keys first, then earlier default keys.
+    $candidates = array_merge( [ [ $key_1, $key_2 ] ], $this->previous_encryption_keys );
 
-    $output = openssl_decrypt(
-      base64_decode( $string ),
-      'AES-256-CBC',
-      $key,
-      0,
-      $iv
-    );
+    if ( 0 === strpos( (string) $string, self::ENCRYPTION_PREFIX ) ) {
+      $raw = base64_decode( substr( $string, strlen( self::ENCRYPTION_PREFIX ) ), true );
+      if ( false === $raw || strlen( $raw ) < 49 ) {
+        $this->last_decrypt_failed = true;
+        return '';
+      }
+      $iv         = substr( $raw, 0, 16 );
+      $mac        = substr( $raw, 16, 32 );
+      $ciphertext = substr( $raw, 48 );
+      $output     = false;
+      foreach ( $candidates as $keys ) {
+        $mac_key = hash_hmac( 'sha256', 'mac', $keys[0] . $keys[1], true );
+        if ( hash_equals( hash_hmac( 'sha256', $iv . $ciphertext, $mac_key, true ), $mac ) ) {
+          $key    = hash_hmac( 'sha256', 'encrypt', $keys[0] . $keys[1], true );
+          $output = openssl_decrypt( $ciphertext, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv );
+          break;
+        }
+      }
+      if ( false === $output ) {
+        // Saved with keys this site no longer has (e.g. its salts changed).
+        $this->last_decrypt_failed = true;
+        return '';
+      }
+    } else {
+      // Older format: fixed IV derived from the keys. Try the current and
+      // earlier keys, then the built-in ones. CBC with a wrong key sometimes
+      // "succeeds" with garbage, so a result only counts if it is valid text.
+      $output     = false;
+      $candidates[] = [ self::LEGACY_KEY_1, self::LEGACY_KEY_2 ];
+      foreach ( $candidates as $keys ) {
+        $attempt = $this->decrypt_legacy( $string, $keys[0], $keys[1] );
+        if ( false !== $attempt && $this->is_text( $attempt ) ) {
+          $output = $attempt;
+          break;
+        }
+      }
+    }
 
     // Attempt to JSON-decode the result to restore arrays if originally encrypted from an array
     $decoded = json_decode( $output, true );
     return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $output;
+  }
+
+  /**
+   * Whether a decrypted value is plain text: valid UTF-8 with no control
+   * characters other than tab and line breaks.
+   */
+  private function is_text( $value ) {
+    return '' === $value || ( preg_match( '//u', $value ) && ! preg_match( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $value ) );
+  }
+
+  /**
+   * Decrypt a value saved in the older fixed-IV format.
+   *
+   * @return string|false
+   */
+  private function decrypt_legacy( $string, $key_1, $key_2 ) {
+    $key = hash( 'sha256', $key_1 );
+    $iv  = substr( hash( 'sha256', $key_2 ), 0, 16 );
+    return openssl_decrypt( base64_decode( $string ), 'AES-256-CBC', $key, 0, $iv );
   }
 
   private function get_admin_notices() {
@@ -1550,6 +1637,35 @@ final class Settings {
    */
   public static function sanitize_settings( $option, $values = [] ) {
     return self::instance()->add_sanitize_settings( $option, $values );
+  }
+
+  /**
+   * Static: Set the default encryption keys, e.g. derived from the site's
+   * salts. Call before encryption_settings(). Values saved with the built-in
+   * keys stay readable and are re-saved with these keys on their next update.
+   *
+   * @param array $keys {
+   *     @type string $key_1    First key.
+   *     @type string $key_2    Second key.
+   *     @type array  $previous Optional earlier key pairs (each with key_1 and
+   *                            key_2) that are still tried when reading.
+   * }
+   */
+  public static function set_encryption_keys( $keys = [] ) {
+    self::instance()->set_default_encryption_keys( $keys );
+  }
+
+  /**
+   * Static: Encrypted settings that couldn't be read because they were saved
+   * with keys this site no longer has. Saving the option again clears them.
+   *
+   * @param string $option Option name.
+   * @return string[] Setting keys.
+   */
+  public static function get_decryption_failures( $option ) {
+    $instance = self::instance();
+    $instance->get_option_values( $option );
+    return isset( $instance->decryption_failures[ $option ] ) ? array_values( $instance->decryption_failures[ $option ] ) : [];
   }
 
   /**

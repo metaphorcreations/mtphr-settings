@@ -226,6 +226,8 @@ Settings::encryption_settings( 'my_plugin_settings', [
 ] );
 ```
 
+By default all plugins share built-in keys. For keys unique to each site, call `Settings::set_encryption_keys()` before `encryption_settings()`, for example with keys derived from `wp_salt()`. Values saved with the built-in keys are still read and are re-saved with the new keys on their next update. See `docs/framework.md` (Encryption) for key rotation (`previous`) and `Settings::get_decryption_failures()`.
+
 ## Conditional Fields
 
 Show or hide fields based on other field values:
