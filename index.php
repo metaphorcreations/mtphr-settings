@@ -1308,10 +1308,16 @@ final class Settings {
       case 'intval':
       case 'floatval':
       case 'boolval':
+        if ( is_object( $value ) ) {
+          return $value;
+        }
         return is_array( $value ) ? self::$instance->loop_sanitize_value( $value, $sanitizer ) : $sanitizer( $value );
       case 'none':
         return $value;
       default:
+        if ( is_object( $value ) ) {
+          return $value;
+        }
         if ( function_exists( $sanitizer ) ) {
           return $sanitizer( $value, $key, $option, $type );
         } else {
